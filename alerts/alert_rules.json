@@ -1,0 +1,43 @@
+
+[
+    {
+        "id": "price_drop_alert",
+        "name": "Price Drop Alert",
+        "type": "PRICE_DROP",
+        "condition": "price_change < -10%",
+        "description": "Alert when crop price drops more than 10%",
+        "enabled": true
+    },
+    {
+        "id": "price_spike_alert", 
+        "name": "Price Spike Alert",
+        "type": "PRICE_SPIKE",
+        "condition": "price_change > 20%",
+        "description": "Alert when crop price increases more than 20%",
+        "enabled": true
+    },
+    {
+        "id": "weather_warning",
+        "name": "Weather Warning",
+        "type": "WEATHER_WARNING",
+        "condition": "extreme_weather_predicted",
+        "description": "Alert for extreme weather conditions",
+        "enabled": true
+    },
+    {
+        "id": "disease_risk",
+        "name": "Disease Risk Alert",
+        "type": "DISEASE_RISK",
+        "condition": "disease_risk_score > threshold",
+        "description": "Alert for high crop disease risk",
+        "enabled": true
+    },
+    {
+        "id": "market_alert",
+        "name": "Market Alert",
+        "type": "MARKET_ALERT",
+        "condition": "unusual_market_activity",
+        "description": "Alert for unusual market activity",
+        "enabled": true
+    }
+]

@@ -1,0 +1,2 @@
+# Price prediction model placeholder
+model_file = "model.pkl"
