@@ -6,7 +6,7 @@ import {
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import {
   RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell,
 } from 'recharts';
 import { riskService } from '../services/api';
 
@@ -150,7 +150,7 @@ export default function RiskAssessment() {
                     <Tooltip />
                     <Bar dataKey="score" radius={[0, 4, 4, 0]}>
                       {risk.factors.map((f) => (
-                        <rect key={f.name} fill={f.score < 35 ? RISK_HEX.LOW : f.score < 65 ? RISK_HEX.MEDIUM : RISK_HEX.HIGH} />
+                        <Cell key={f.name} fill={f.score < 35 ? RISK_HEX.LOW : f.score < 65 ? RISK_HEX.MEDIUM : RISK_HEX.HIGH} />
                       ))}
                     </Bar>
                   </BarChart>
