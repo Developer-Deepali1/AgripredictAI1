@@ -1,16 +1,37 @@
-"""
-Simulation Pydantic schemas
-"""
+"""Simulation Pydantic schemas"""
 from pydantic import BaseModel
-from typing import Dict, Any, Optional
+from typing import Optional
 
-class SimulationRequest(BaseModel):
-    """Simulation request schema"""
-    scenario: Dict[str, Any]
+class SimulationRunRequest(BaseModel):
     crop: str
+    area_ha: float
+    yield_kg_ha: float
+    price_per_kg: float
+    cost_per_ha: Optional[float] = None
 
-class SimulationResponse(BaseModel):
-    """Simulation response schema"""
-    scenario_name: str
-    results: Dict[str, Any]
-    estimated_profit: float
+class SimulationRunResponse(BaseModel):
+    crop: str
+    area_ha: float
+    yield_kg_ha: float
+    price_per_kg: float
+    total_revenue: float
+    total_cost: float
+    net_profit: float
+    roi_percent: float
+    break_even_price_per_kg: float
+
+class SimulationCompareRequest(BaseModel):
+    scenario_a: SimulationRunRequest
+    scenario_b: SimulationRunRequest
+
+class ScenarioResult(BaseModel):
+    scenario: str
+    crop: str
+    net_profit: float
+    roi_percent: float
+
+class SimulationCompareResponse(BaseModel):
+    scenario_a: ScenarioResult
+    scenario_b: ScenarioResult
+    better_scenario: str
+    profit_difference: float

@@ -208,3 +208,6 @@ __marimo__/
 
 # ML Models
 *.pkl
+# Frontend
+frontend/node_modules/
+frontend/build/
