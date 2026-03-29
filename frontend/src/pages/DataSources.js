@@ -187,12 +187,12 @@ const DATA_SOURCES = [
   {
     name: 'Crop Patterns',
     icon: <NatureIcon fontSize="large" />,
-    status: 'Updating',
-    quality: 78,
-    lastSync: '3 hours ago',
+    status: 'Operational',
+    quality: 92,
+    lastSync: '30 minutes ago',
     records: '12,000 crop records',
-    description: 'Historical crop production and sowing patterns by district',
-    color: '#F59E0B',
+    description: 'Comprehensive historical crop patterns and sowing seasons across all 28 Indian states',
+    color: '#10B981',
   },
 ];
 
