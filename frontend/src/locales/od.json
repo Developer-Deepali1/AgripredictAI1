@@ -1,0 +1,49 @@
+{
+  "common": {
+    "logout": "ଲଗଆଉଟ",
+    "profile": "ପ୍ରୋଫାଇଲ",
+    "send": "ପଠାନ୍ତୁ",
+    "close": "ବନ୍ଦ କରନ୍ତୁ",
+    "clearChat": "ଚ୍ୟାଟ ସଫା କରନ୍ତୁ",
+    "send_tooltip": "ପଠାନ୍ତୁ (Enter)"
+  },
+  "sidebar": {
+    "brand": "AgripredictAI",
+    "tagline": "ସ୍ମାର୍ଟ ଚାଷ",
+    "farmer": "ଚାଷୀ",
+    "location": "ଭାରତ",
+    "expandTooltip": "ସାଇଡବାର ଖୋଲନ୍ତୁ (Alt+S)",
+    "collapseTooltip": "ସାଇଡବାର ବନ୍ଦ କରନ୍ତୁ (Alt+S)",
+    "nav": {
+      "dashboard": "ଡ୍ୟାଶବୋର୍ଡ",
+      "predictions": "ବଜାର ପୂର୍ବାନୁମାନ",
+      "feasibility": "ସମ୍ଭାବ୍ୟତା",
+      "profit": "ଲାଭ ବିଶ୍ଳେଷଣ",
+      "risk": "ଜୋଖିମ ମୂଲ୍ୟାଙ୍କନ",
+      "recommendations": "ସ୍ମାର୍ଟ ପରାମର୍ଶ",
+      "simulator": "ସିମୁଲେଟର",
+      "alerts": "ସତର୍କତା",
+      "dataSources": "ତଥ୍ୟ ଉତ୍ସ"
+    }
+  },
+  "chat": {
+    "title": "AgriPredict AI",
+    "subtitle": "ଚାଷୀ ସହାୟକ",
+    "placeholder": "ଫସଲ, ମୂଲ୍ୟ, ଜୋଖିମ ବିଷୟରେ ପଚାରନ୍ତୁ…",
+    "emptyState": "ଫସଲ ବିଷୟରେ ଯେକୌଣସି କଥା ପଚାରନ୍ତୁ!",
+    "greeting": "👋 ନମସ୍କାର! ମୁଁ ଆପଣଙ୍କ **AgriPredict AI ସହାୟକ**।\n\nମୁଁ ଏଥିରେ ସାହାଯ୍ୟ କରିପାରିବି:\n• 🌾 ଫସଲ ମୂଲ୍ୟ ପୂର୍ବାନୁମାନ\n• ⚖️ ଫସଲ ତୁଳନା\n• 📍 ଅଞ୍ଚଳ-ନିର୍ଦ୍ଦିଷ୍ଟ ପରାମର୍ଶ\n• ⚠️ ଜୋଖିମ ଓ ଲାଭ ବିଶ୍ଳେଷଣ\n\nଉଦାହରଣ: \"ଓଡ଼ିଶାରେ ଧାନ ଚାଷ କଲେ?\" ବା \"ଗହମ ଓ ମକା ତୁଳନା\"",
+    "openAriaLabel": "AI ସହାୟକ ଖୋଲନ୍ତୁ",
+    "suggestions": {
+      "bestCrop": "ଏହି ମାସରେ କେଉଁ ଫସଲ ସବୁଠୁ ଭଲ?",
+      "compareRiceWheat": "ଧାନ ଓ ଗହମ ତୁଳନା କରନ୍ତୁ",
+      "checkRiskCotton": "କପାସ ପାଇଁ ଜୋଖିମ ଯାଞ୍ଚ କରନ୍ତୁ"
+    },
+    "structuredData": {
+      "price": "ମୂଲ୍ୟ",
+      "demand": "ଚାହିଦା",
+      "risk": "ଜୋଖିମ",
+      "profitability": "ଲାଭଜନକତା",
+      "trend": "ଧାରା"
+    }
+  }
+}

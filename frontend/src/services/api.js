@@ -11,7 +11,8 @@ const api = axios.create({
 const isDev = process.env.NODE_ENV !== 'production';
 
 // Retry a request function with exponential backoff
-const retryRequest = async (fn, retries = 3, delay = 1000) => {
+const retryRequest = async (fn, retries = 3, initialDelay = 1000) => {
+  let delay = initialDelay;
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
       return await fn();
@@ -27,7 +28,8 @@ const retryRequest = async (fn, retries = 3, delay = 1000) => {
       if (isDev) {
         console.warn(`[API] Retry attempt ${attempt + 1}/${retries - 1} after ${delay}ms`, err.message);
       }
-      await new Promise((resolve) => setTimeout(resolve, delay));
+      const currentDelay = delay;
+      await new Promise((resolve) => setTimeout(resolve, currentDelay));
       delay *= 2; // exponential backoff
     }
   }
