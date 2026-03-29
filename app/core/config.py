@@ -32,7 +32,15 @@ class Settings(BaseSettings):
     # External Services
     WEATHER_API_KEY: str = ""
     MARKET_DATA_API_KEY: str = ""
-    
+
+    # Chatbot / Voice / Translation Settings
+    OPENAI_API_KEY: str = ""
+    GOOGLE_TRANSLATE_API_KEY: str = ""
+    ENABLE_VOICE: bool = True
+    ENABLE_MULTILINGUAL: bool = True
+    CONVERSATION_MEMORY_SIZE: int = 5
+    DEFAULT_LANGUAGE: str = "en"
+
     class Config:
         env_file = ".env"
         case_sensitive = True

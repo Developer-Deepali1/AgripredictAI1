@@ -98,4 +98,14 @@ export const dashboardService = {
   getSummary: () => api.get('/api/dashboard/summary'),
 };
 
+// Chatbot
+export const chatbotService = {
+  chat: (data) => api.post('/api/chat/', data),
+  getHistory: (sessionId) => api.get(`/api/chat/history/${sessionId}`),
+  clearHistory: (sessionId) => api.delete(`/api/chat/history/${sessionId}`),
+  voiceChat: (formData) => api.post('/api/chat/voice', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
+};
+
 export default api;

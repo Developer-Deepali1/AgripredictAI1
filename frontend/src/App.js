@@ -15,6 +15,7 @@ import SmartRecommendations from './pages/SmartRecommendations';
 import Simulator from './pages/Simulator';
 import Alerts from './pages/Alerts';
 import DataSources from './pages/DataSources';
+import ChatWindow from './components/ChatBot/ChatWindow';
 
 const theme = createTheme({
   palette: {
@@ -154,6 +155,8 @@ export default function App() {
       <AuthProvider>
         <BrowserRouter>
           <AppRoutes />
+          {/* Global floating chatbot – available on all authenticated pages */}
+          <ChatWindow />
         </BrowserRouter>
       </AuthProvider>
     </ThemeProvider>
