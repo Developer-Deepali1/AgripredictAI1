@@ -5,7 +5,6 @@ Chatbot API endpoints:
   DELETE /api/chat/history/{session_id} – clear history
   GET    /api/chat/audio/{filename}     – serve TTS audio files
 """
-import logging
 import os
 import tempfile
 import uuid
@@ -14,6 +13,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import FileResponse
 
+from app.core.logger import api_logger as logger
 from app.schemas.chatbot_schema import (
     ChatRequest,
     ChatResponse,
@@ -23,8 +23,6 @@ from app.schemas.chatbot_schema import (
     StructuredCropData,
 )
 from app.services import chatbot_service, conversation_memory
-
-logger = logging.getLogger(__name__)
 router = APIRouter()
 
 # Directory where TTS audio files are stored (must match text_to_speech.py)
@@ -57,6 +55,9 @@ def _build_response(raw: dict, session_id: str) -> ChatResponse:
         suggestions=raw.get("suggestions", []),
         detected_language=raw.get("detected_language", "en"),
         session_id=session_id,
+        request_id=raw.get("request_id"),
+        error=raw.get("error"),
+        error_code=raw.get("error_code"),
     )
 
 
@@ -69,8 +70,12 @@ def chat(payload: ChatRequest) -> ChatResponse:
     """
     Process a text message from a farmer and return an AI-generated response.
     """
-    # Generate a session_id if not provided (shouldn't happen due to schema validation)
     session_id = payload.session_id or str(uuid.uuid4())
+
+    logger.info(
+        "Chat request | session=%s lang=%s msg_len=%d",
+        session_id, payload.language, len(payload.message),
+    )
 
     try:
         raw = chatbot_service.process_message(
@@ -79,10 +84,24 @@ def chat(payload: ChatRequest) -> ChatResponse:
             session_id=session_id,
         )
     except Exception as exc:
-        logger.exception("Chatbot processing error: %s", exc)
+        logger.exception("Unexpected chatbot processing error: %s", exc)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="I encountered an error processing your request. Please try again.",
+            detail={
+                "error": "I encountered an error processing your request. Please try again.",
+                "error_code": "UNK_001",
+            },
+        )
+
+    if raw.get("error_code"):
+        logger.warning(
+            "Chat request completed with error | session=%s error_code=%s request_id=%s",
+            session_id, raw.get("error_code"), raw.get("request_id"),
+        )
+    else:
+        logger.info(
+            "Chat request completed | session=%s request_id=%s",
+            session_id, raw.get("request_id"),
         )
 
     return _build_response(raw, session_id)

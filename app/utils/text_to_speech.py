@@ -8,12 +8,11 @@ Priority order:
   3. Returns None on failure.
 """
 import hashlib
-import logging
 import os
 import tempfile
 from typing import Optional
 
-logger = logging.getLogger(__name__)
+from app.core.logger import tts_logger as logger
 
 # Directory where generated audio files are stored
 _AUDIO_DIR = os.path.join(tempfile.gettempdir(), "agripredict_tts")

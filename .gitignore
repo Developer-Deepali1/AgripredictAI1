@@ -211,3 +211,6 @@ __marimo__/
 # Frontend
 frontend/node_modules/
 frontend/build/
+
+# Application log files
+logs/*.log

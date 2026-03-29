@@ -3,9 +3,8 @@ Language detection utility.
 Tries langdetect first; falls back to simple heuristics.
 """
 import re
-import logging
 
-logger = logging.getLogger(__name__)
+from app.core.logger import lang_detect_logger as logger
 
 # --------------------------------------------------------------------------
 # Devanagari Unicode ranges used by Hindi (and partially Odia)
