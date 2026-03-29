@@ -1,7 +1,6 @@
 """
 Risk Analyzer Engine – calculates risk level and profitability score for a crop.
 """
-import random
 import logging
 from datetime import date
 

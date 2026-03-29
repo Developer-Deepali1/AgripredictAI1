@@ -3,6 +3,7 @@ Chatbot Service – core logic that ties together intent parsing,
 prediction, risk analysis, comparison, translation, and TTS.
 """
 import logging
+import os
 from datetime import date
 from typing import Optional, List, Dict, Any
 
@@ -105,11 +106,8 @@ def process_message(
         en_message = message  # safety fallback
 
     # Inject context crop/state when message is a follow-up
-    words_in_msg = set(en_message.lower().split())
-    context_injected = False
     if ctx.get("last_crop") and ctx["last_crop"].lower() not in en_message.lower():
         en_message_enriched = f"{en_message} (about {ctx['last_crop']})"
-        context_injected = True
     else:
         en_message_enriched = en_message
 
@@ -212,7 +210,6 @@ def process_message(
     try:
         audio_path = text_to_speech.synthesize_speech(reply_final, detected_language)
         if audio_path:
-            import os
             filename = os.path.basename(audio_path)
             audio_url = f"/api/chat/audio/{filename}"
     except Exception as exc:

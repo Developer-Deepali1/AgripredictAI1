@@ -113,13 +113,17 @@ def clear_history(session_id: str) -> None:
 @router.get("/audio/{filename}", summary="Serve a TTS audio file")
 def serve_audio(filename: str) -> FileResponse:
     """Stream a previously generated TTS audio file."""
-    # Sanitise filename to prevent path traversal
+    # Sanitise filename to prevent path traversal (including symlink attacks)
     safe_name = os.path.basename(filename)
     if not safe_name or ".." in safe_name:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid filename")
 
     audio_path = os.path.join(_AUDIO_DIR, safe_name)
-    if not os.path.isfile(audio_path):
+    # Use realpath to resolve symlinks and verify the file is within the audio directory
+    resolved = os.path.realpath(audio_path)
+    if not resolved.startswith(os.path.realpath(_AUDIO_DIR) + os.sep):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid filename")
+    if not os.path.isfile(resolved):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Audio file not found")
 
-    return FileResponse(audio_path, media_type="audio/mpeg", filename=safe_name)
+    return FileResponse(resolved, media_type="audio/mpeg", filename=safe_name)

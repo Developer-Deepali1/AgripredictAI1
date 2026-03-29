@@ -11,7 +11,8 @@ import styles from './ChatBot.module.css';
 export default function VoiceOutput({ text, language }) {
   const [isSpeaking, setIsSpeaking] = useState(false);
 
-  const langMap = { en: 'en-IN', hi: 'hi-IN', od: 'en-IN' };
+  // Use 'or-IN' for Odia; fall back to 'en-IN' if browser doesn't support it
+  const langMap = { en: 'en-IN', hi: 'hi-IN', od: 'or-IN' };
 
   const speak = () => {
     if (!window.speechSynthesis) return;

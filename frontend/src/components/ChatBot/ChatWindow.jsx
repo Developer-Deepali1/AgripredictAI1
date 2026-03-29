@@ -27,6 +27,13 @@ import { chatbotService } from '../../services/api';
 // Stable session ID for this browser session
 const SESSION_ID = `session_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 
+// Default suggestion prompts shown to users
+const DEFAULT_SUGGESTIONS = [
+  'What crop is best this month?',
+  'Compare rice and wheat',
+  'Check risks for cotton',
+];
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatTime(iso) {
@@ -119,23 +126,21 @@ export default function ChatWindow() {
   const [input, setInput] = useState('');
   const [language, setLanguage] = useState('en');
   const [loading, setLoading] = useState(false);
-  const [suggestions, setSuggestions] = useState([
-    'What crop is best this month?',
-    'Compare rice and wheat',
-    'Check risks for cotton',
-  ]);
+  const [suggestions, setSuggestions] = useState(DEFAULT_SUGGESTIONS);
 
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
+  const greetingShownRef = useRef(false);
 
   // Scroll to bottom whenever messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
-  // Show greeting on first open
+  // Show greeting on first open only
   useEffect(() => {
-    if (open && messages.length === 0) {
+    if (open && !greetingShownRef.current) {
+      greetingShownRef.current = true;
       setMessages([
         {
           role: 'assistant',
@@ -146,7 +151,7 @@ export default function ChatWindow() {
         },
       ]);
     }
-  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [open, language]);
 
   const sendMessage = useCallback(
     async (text) => {
@@ -223,7 +228,7 @@ export default function ChatWindow() {
       // best-effort
     }
     setMessages([]);
-    setSuggestions(['What crop is best this month?', 'Compare rice and wheat', 'Check risks for cotton']);
+    setSuggestions(DEFAULT_SUGGESTIONS);
   };
 
   return (
