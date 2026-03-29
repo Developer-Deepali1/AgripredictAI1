@@ -11,6 +11,7 @@ import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import EmailIcon from '@mui/icons-material/Email';
 import SmsIcon from '@mui/icons-material/Sms';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
 import { alertsService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -40,6 +41,17 @@ const ALL_HISTORY = [
 ];
 
 const SEVERITY_COLOR = { HIGH: 'error', MEDIUM: 'warning', LOW: 'success' };
+
+// Numeric rank so we can compare "meets threshold" (e.g. MEDIUM threshold → HIGH and MEDIUM fire)
+const SEVERITY_RANK = { HIGH: 3, MEDIUM: 2, LOW: 1 };
+
+/**
+ * Returns true when the alert's severity is at or above the user's chosen threshold.
+ * Defaults to 'HIGH' when threshold is unset.
+ */
+function meetsThreshold(severity, threshold) {
+  return (SEVERITY_RANK[severity] || 0) >= (SEVERITY_RANK[threshold] || SEVERITY_RANK.HIGH);
+}
 
 const TYPE_ICON = {
   'Price Drop': <TrendingDownIcon color="error" />,
@@ -81,8 +93,9 @@ function maskPhone(phone) {
   return `${phone.slice(0, 2)}*****${phone.slice(-3)}`;
 }
 
-function AlertItem({ alert, notifyEmail, notifySms, userEmail, userPhone }) {
-  const isHighNotified = alert.severity === 'HIGH' && (notifyEmail || notifySms);
+function AlertItem({ alert, notifyEmail, notifySms, userEmail, userPhone, alertThreshold }) {
+  const threshold = alertThreshold || 'HIGH';
+  const isNotified = meetsThreshold(alert.severity, threshold) && (notifyEmail || notifySms);
   return (
     <ListItem
       sx={{
@@ -107,11 +120,14 @@ function AlertItem({ alert, notifyEmail, notifySms, userEmail, userPhone }) {
             <Chip label={alert.type} size="small" variant="outlined" />
             <Chip label={alert.crop} size="small" color="primary" variant="outlined" />
             <Typography variant="caption" color="text.secondary">{alert.time}</Typography>
-            {isHighNotified && notifyEmail && (
+            {isNotified && notifyEmail && (
               <Chip icon={<EmailIcon />} label={`Email: ${maskEmail(userEmail)}`} size="small" color="info" variant="outlined" sx={{ fontSize: 10 }} />
             )}
-            {isHighNotified && notifySms && (
+            {isNotified && notifySms && (
               <Chip icon={<SmsIcon />} label={`SMS: ${maskPhone(userPhone)}`} size="small" color="success" variant="outlined" sx={{ fontSize: 10 }} />
+            )}
+            {isNotified && (
+              <Chip icon={<CheckCircleOutlineIcon />} label="Sent" size="small" color="success" sx={{ fontSize: 10 }} />
             )}
           </Box>
         }
@@ -136,6 +152,7 @@ export default function Alerts() {
   const notifySms = userProfile?.notify_sms || false;
   const userEmail = userProfile?.email || '';
   const userPhone = userProfile?.phone || '';
+  const alertThreshold = userProfile?.alert_threshold || 'HIGH';
   const hasLocation = Boolean(userState && userDistrict);
 
   useEffect(() => {
@@ -241,6 +258,7 @@ export default function Alerts() {
                         key={a.id} alert={a}
                         notifyEmail={notifyEmail} notifySms={notifySms}
                         userEmail={userEmail} userPhone={userPhone}
+                        alertThreshold={alertThreshold}
                       />
                     ))}
                   </List>
@@ -262,6 +280,7 @@ export default function Alerts() {
                         key={a.id} alert={{ ...a, read: true }}
                         notifyEmail={notifyEmail} notifySms={notifySms}
                         userEmail={userEmail} userPhone={userPhone}
+                        alertThreshold={alertThreshold}
                       />
                     ))}
                   </List>
