@@ -7,13 +7,78 @@ All endpoints are intentionally **not** protected by auth so that
 developers / CI pipelines can exercise them without credentials.
 Remove or restrict these in a hardened production deployment.
 """
+import uuid
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Query, status
+from pydantic import BaseModel, Field
 
 from app.core.logger import LOG_DIR, api_logger
 
 router = APIRouter(prefix="/api/debug", tags=["Debug"])
+
+
+# ---------------------------------------------------------------------------
+# Chat test (POST) – end-to-end smoke test without authentication
+# ---------------------------------------------------------------------------
+
+class TestChatBody(BaseModel):
+    message: str = Field(default="Hello", min_length=1, max_length=1000, description="Chat message (any supported language)")
+    language: str = Field(default="en", description="Language code (en/hi/od)")
+    session_id: str = Field(default_factory=lambda: f"debug-{uuid.uuid4().hex[:8]}", description="Session identifier – a unique value is generated per request if omitted")
+
+
+@router.post("/test-chat", summary="Test the full chatbot pipeline (no auth required)")
+def test_chat_post(body: TestChatBody) -> dict:
+    """
+    Run the complete chatbot pipeline via a POST request and return the full
+    response together with any intermediate error information.
+
+    This endpoint does **not** require authentication and is intended for
+    development / CI smoke-testing.
+    """
+    request_id = str(uuid.uuid4())[:8]
+    api_logger.info(
+        "[%s] Debug test-chat | session=%s lang=%s msg='%.100s'",
+        request_id, body.session_id, body.language, body.message,
+    )
+
+    try:
+        from app.services.chatbot_service import process_message
+
+        result = process_message(
+            message=body.message,
+            language=body.language,
+            session_id=body.session_id,
+        )
+        api_logger.info(
+            "[%s] Debug test-chat succeeded | reply_len=%d",
+            request_id, len(result.get("reply_text", "")),
+        )
+        return {
+            "status": "success",
+            "request_id": request_id,
+            "input": {
+                "message": body.message,
+                "language": body.language,
+                "session_id": body.session_id,
+            },
+            "result": result,
+        }
+    except Exception as exc:
+        api_logger.error(
+            "[%s] Debug test-chat failed: %s", request_id, exc, exc_info=True
+        )
+        return {
+            "status": "failed",
+            "request_id": request_id,
+            "input": {
+                "message": body.message,
+                "language": body.language,
+                "session_id": body.session_id,
+            },
+            "error": str(exc),
+        }
 
 
 # ---------------------------------------------------------------------------
