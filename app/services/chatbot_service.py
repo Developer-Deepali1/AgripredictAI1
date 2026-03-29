@@ -13,7 +13,6 @@ from typing import Optional, List, Dict, Any
 
 from app.core.constants import SUPPORTED_CROPS
 from app.core.logger import chatbot_logger as logger
-from app.core.logger import chatbot_logger as logger  # structured logger with file output
 from app.engines import intent_engine, comparison_engine, risk_analyzer
 from app.services import conversation_memory
 from app.utils import language_detector, translator, text_to_speech, prompt_templates

@@ -14,7 +14,6 @@ from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import FileResponse
 
 from app.core.logger import api_logger as logger
-from app.core.logger import api_logger as logger  # file-backed structured logger
 from app.schemas.chatbot_schema import (
     ChatRequest,
     ChatResponse,
@@ -121,10 +120,6 @@ def chat(payload: ChatRequest) -> ChatResponse:
         logger.info(
             "Chat request completed | session=%s request_id=%s",
             session_id, raw.get("request_id"),
-                "error": "An unexpected error occurred. Please try again.",
-                "error_code": "UNK_001",
-                "details": {"exception": str(exc)},
-            },
         )
 
     return _build_response(raw, session_id)
