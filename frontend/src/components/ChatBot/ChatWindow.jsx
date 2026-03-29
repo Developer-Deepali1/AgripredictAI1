@@ -168,13 +168,13 @@ export default function ChatWindow() {
       setSuggestions([]);
       setLoading(true);
 
+      const isDev = process.env.NODE_ENV !== 'production';
       try {
-        const res = await chatbotService.chat({
-          message: trimmed,
-          language,
-          session_id: SESSION_ID,
-        });
+        const payload = { message: trimmed, language, session_id: SESSION_ID };
+        if (isDev) console.log('🚀 Chatbot Request:', payload);
+        const res = await chatbotService.chat(payload);
         const data = res.data;
+        if (isDev) console.log('📥 Chatbot Response:', data);
 
         const botMsg = {
           role: 'assistant',
@@ -187,7 +187,12 @@ export default function ChatWindow() {
         setMessages((prev) => [...prev, botMsg]);
         if (data.suggestions?.length) setSuggestions(data.suggestions);
       } catch (err) {
-        const errMsg = err?.response?.data?.detail || 'Sorry, I encountered an error. Please try again.';
+        const errDetail = err?.response?.data?.detail;
+        const errMsg =
+          (typeof errDetail === 'object' ? errDetail?.error : errDetail) ||
+          err?.message ||
+          'Sorry, I encountered an error. Please try again.';
+        if (isDev) console.error('❌ Chatbot Error:', { status: err?.response?.status, detail: errDetail });
         setMessages((prev) => [
           ...prev,
           {
