@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { CssBaseline, Box } from '@mui/material';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { LanguageProvider } from './context/LanguageContext';
 import Sidebar, { EXPANDED_WIDTH, COLLAPSED_WIDTH } from './components/Layout/Sidebar';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -152,13 +153,15 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <AuthProvider>
-        <BrowserRouter>
-          <AppRoutes />
-          {/* Global floating chatbot – available on all authenticated pages */}
-          <ChatWindow />
-        </BrowserRouter>
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <AppRoutes />
+            {/* Global floating chatbot – available on all authenticated pages */}
+            <ChatWindow />
+          </BrowserRouter>
+        </AuthProvider>
+      </LanguageProvider>
     </ThemeProvider>
   );
 }

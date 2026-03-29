@@ -1,0 +1,49 @@
+{
+  "common": {
+    "logout": "लॉगआउट",
+    "profile": "प्रोफ़ाइल",
+    "send": "भेजें",
+    "close": "बंद करें",
+    "clearChat": "चैट साफ़ करें",
+    "send_tooltip": "भेजें (Enter)"
+  },
+  "sidebar": {
+    "brand": "AgripredictAI",
+    "tagline": "स्मार्ट खेती",
+    "farmer": "किसान",
+    "location": "भारत",
+    "expandTooltip": "साइडबार खोलें (Alt+S)",
+    "collapseTooltip": "साइडबार बंद करें (Alt+S)",
+    "nav": {
+      "dashboard": "डैशबोर्ड",
+      "predictions": "बाज़ार पूर्वानुमान",
+      "feasibility": "व्यावहारिकता",
+      "profit": "लाभ विश्लेषण",
+      "risk": "जोखिम मूल्यांकन",
+      "recommendations": "स्मार्ट सुझाव",
+      "simulator": "सिम्युलेटर",
+      "alerts": "अलर्ट",
+      "dataSources": "डेटा स्रोत"
+    }
+  },
+  "chat": {
+    "title": "AgriPredict AI",
+    "subtitle": "किसान सहायक",
+    "placeholder": "फसलों, कीमतों, जोखिमों के बारे में पूछें…",
+    "emptyState": "फसलों के बारे में कुछ भी पूछें!",
+    "greeting": "👋 नमस्ते! मैं आपका **AgriPredict AI सहायक** हूँ।\n\nमैं इनमें मदद कर सकता हूँ:\n• 🌾 फसल मूल्य पूर्वानुमान\n• ⚖️ फसल तुलना\n• 📍 क्षेत्र-विशिष्ट सुझाव\n• ⚠️ जोखिम और लाभप्रदता विश्लेषण\n\nउदाहरण: \"ओडिशा में चावल उगाऊं तो?\" या \"गेहूं और मक्का की तुलना\"",
+    "openAriaLabel": "AI सहायक खोलें",
+    "suggestions": {
+      "bestCrop": "इस महीने कौन सी फसल सबसे अच्छी है?",
+      "compareRiceWheat": "चावल और गेहूं की तुलना करें",
+      "checkRiskCotton": "कपास के लिए जोखिम जांचें"
+    },
+    "structuredData": {
+      "price": "कीमत",
+      "demand": "मांग",
+      "risk": "जोखिम",
+      "profitability": "लाभप्रदता",
+      "trend": "रुझान"
+    }
+  }
+}

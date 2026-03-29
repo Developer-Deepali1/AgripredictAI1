@@ -1,0 +1,49 @@
+{
+  "common": {
+    "logout": "Logout",
+    "profile": "Profile",
+    "send": "Send",
+    "close": "Close",
+    "clearChat": "Clear chat",
+    "send_tooltip": "Send (Enter)"
+  },
+  "sidebar": {
+    "brand": "AgripredictAI",
+    "tagline": "Smart Farming",
+    "farmer": "Farmer",
+    "location": "India",
+    "expandTooltip": "Expand sidebar (Alt+S)",
+    "collapseTooltip": "Collapse sidebar (Alt+S)",
+    "nav": {
+      "dashboard": "Dashboard",
+      "predictions": "Market Predictions",
+      "feasibility": "Feasibility",
+      "profit": "Profit Analysis",
+      "risk": "Risk Assessment",
+      "recommendations": "Smart Recommendations",
+      "simulator": "Simulator",
+      "alerts": "Alerts",
+      "dataSources": "Data Sources"
+    }
+  },
+  "chat": {
+    "title": "AgriPredict AI",
+    "subtitle": "Farmer Assistant",
+    "placeholder": "Ask about crops, prices, risks…",
+    "emptyState": "Ask me anything about crops!",
+    "greeting": "👋 Hello! I'm your **AgriPredict AI Assistant**.\n\nI can help you with:\n• 🌾 Crop price predictions\n• ⚖️ Crop comparisons\n• 📍 Region-specific recommendations\n• ⚠️ Risk & profitability analysis\n\nTry: \"What if I grow rice in Odisha?\" or \"Compare wheat and maize\"",
+    "openAriaLabel": "Open AI assistant",
+    "suggestions": {
+      "bestCrop": "What crop is best this month?",
+      "compareRiceWheat": "Compare rice and wheat",
+      "checkRiskCotton": "Check risks for cotton"
+    },
+    "structuredData": {
+      "price": "Price",
+      "demand": "Demand",
+      "risk": "Risk",
+      "profitability": "Profitability",
+      "trend": "Trend"
+    }
+  }
+}

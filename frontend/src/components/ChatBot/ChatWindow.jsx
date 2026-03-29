@@ -23,16 +23,11 @@ import LanguageSelector from './LanguageSelector';
 import VoiceInput from './VoiceInput';
 import VoiceOutput from './VoiceOutput';
 import { chatbotService } from '../../services/api';
+import { useLanguage } from '../../context/LanguageContext';
+import { t } from '../../utils/i18n';
 
 // Stable session ID for this browser session
 const SESSION_ID = `session_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-
-// Default suggestion prompts shown to users
-const DEFAULT_SUGGESTIONS = [
-  'What crop is best this month?',
-  'Compare rice and wheat',
-  'Check risks for cotton',
-];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -51,16 +46,17 @@ function RiskBadge({ level }) {
 }
 
 function StructuredCard({ data }) {
+  useLanguage(); // subscribe to language changes so t() returns updated translations
   if (!data) return null;
   const rows = [
     data.predicted_price != null && {
-      label: 'Price',
+      label: t('chat.structuredData.price'),
       value: `₹${Math.round(data.predicted_price)}/qtl`,
     },
-    data.demand_level && { label: 'Demand', value: <RiskBadge level={data.demand_level} /> },
-    data.risk_level   && { label: 'Risk',   value: <RiskBadge level={data.risk_level} /> },
+    data.demand_level && { label: t('chat.structuredData.demand'), value: <RiskBadge level={data.demand_level} /> },
+    data.risk_level   && { label: t('chat.structuredData.risk'),   value: <RiskBadge level={data.risk_level} /> },
     data.profitability != null && {
-      label: 'Profitability',
+      label: t('chat.structuredData.profitability'),
       value: (
         <span>
           {Math.round(data.profitability)}%{' '}
@@ -73,7 +69,7 @@ function StructuredCard({ data }) {
         </span>
       ),
     },
-    data.trend && { label: 'Trend', value: data.trend },
+    data.trend && { label: t('chat.structuredData.trend'), value: data.trend },
   ].filter(Boolean);
 
   return (
@@ -124,13 +120,21 @@ export default function ChatWindow() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
-  const [language, setLanguage] = useState('en');
   const [loading, setLoading] = useState(false);
-  const [suggestions, setSuggestions] = useState(DEFAULT_SUGGESTIONS);
+  const [suggestions, setSuggestions] = useState([]);
+
+  const { language, setLanguage } = useLanguage();
 
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
   const greetingShownRef = useRef(false);
+
+  // Build default suggestions from translations
+  const getDefaultSuggestions = useCallback(() => [
+    t('chat.suggestions.bestCrop'),
+    t('chat.suggestions.compareRiceWheat'),
+    t('chat.suggestions.checkRiskCotton'),
+  ], [language]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Scroll to bottom whenever messages change
   useEffect(() => {
@@ -144,14 +148,22 @@ export default function ChatWindow() {
       setMessages([
         {
           role: 'assistant',
-          content:
-            '👋 Hello! I\'m your **AgriPredict AI Assistant**.\n\nI can help you with:\n• 🌾 Crop price predictions\n• ⚖️ Crop comparisons\n• 📍 Region-specific recommendations\n• ⚠️ Risk & profitability analysis\n\nTry: "What if I grow rice in Odisha?" or "Compare wheat and maize"',
+          content: t('chat.greeting'),
           timestamp: new Date().toISOString(),
           language,
         },
       ]);
+      setSuggestions(getDefaultSuggestions());
     }
-  }, [open, language]);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Update suggestions when language changes (if still showing defaults)
+  useEffect(() => {
+    setSuggestions((prev) => {
+      if (prev.length === 0) return prev;
+      return getDefaultSuggestions();
+    });
+  }, [language]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const sendMessage = useCallback(
     async (text) => {
@@ -233,7 +245,7 @@ export default function ChatWindow() {
       // best-effort
     }
     setMessages([]);
-    setSuggestions(DEFAULT_SUGGESTIONS);
+    setSuggestions(getDefaultSuggestions());
   };
 
   return (
@@ -242,7 +254,7 @@ export default function ChatWindow() {
       <Fab
         className={styles.fabButton}
         onClick={() => setOpen((v) => !v)}
-        aria-label="Open AI assistant"
+        aria-label={t('chat.openAriaLabel')}
       >
         <SmartToyIcon />
       </Fab>
@@ -255,13 +267,13 @@ export default function ChatWindow() {
             <Box className={styles.headerLeft}>
               <Box className={styles.botAvatar}>🤖</Box>
               <Box>
-                <Typography className={styles.headerTitle}>AgriPredict AI</Typography>
-                <Typography className={styles.headerSubtitle}>Farmer Assistant</Typography>
+                <Typography className={styles.headerTitle}>{t('chat.title')}</Typography>
+                <Typography className={styles.headerSubtitle}>{t('chat.subtitle')}</Typography>
               </Box>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               <LanguageSelector language={language} onChange={setLanguage} />
-              <Tooltip title="Clear chat">
+              <Tooltip title={t('common.clearChat')}>
                 <IconButton size="small" onClick={clearHistory} sx={{ color: 'rgba(255,255,255,0.8)' }}>
                   <DeleteOutlineIcon fontSize="small" />
                 </IconButton>
@@ -277,7 +289,7 @@ export default function ChatWindow() {
             {messages.length === 0 && !loading && (
               <Box className={styles.emptyState}>
                 <span className={styles.emptyIcon}>🌾</span>
-                <Typography variant="body2">Ask me anything about crops!</Typography>
+                <Typography variant="body2">{t('chat.emptyState')}</Typography>
               </Box>
             )}
 
@@ -312,14 +324,14 @@ export default function ChatWindow() {
             <textarea
               ref={textareaRef}
               className={styles.textInput}
-              placeholder="Ask about crops, prices, risks…"
+              placeholder={t('chat.placeholder')}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               rows={1}
               disabled={loading}
             />
-            <Tooltip title="Send (Enter)">
+            <Tooltip title={t('common.send_tooltip')}>
               <span>
                 <IconButton
                   size="small"

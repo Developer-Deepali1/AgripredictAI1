@@ -8,6 +8,11 @@ const LANGUAGES = [
   { code: 'od', label: '🪷  OD' },
 ];
 
+/**
+ * LanguageSelector accepts optional `language` and `onChange` props for
+ * controlled use. When not provided, it falls back to reading/writing the
+ * global LanguageContext (imported lazily to avoid circular deps).
+ */
 export default function LanguageSelector({ language, onChange }) {
   return (
     <FormControl size="small" variant="standard">
