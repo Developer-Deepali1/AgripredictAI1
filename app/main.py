@@ -1,6 +1,8 @@
 """
 AgriPredictAI Backend - FastAPI Entry Point
 """
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import (
@@ -9,10 +11,12 @@ from app.api import (
     recommendation_api, simulation_api, alert_api, dashboard_api,
     chatbot_api, voice_api, debug_api,
 )
-from app.api.debug_api import router as debug_router
+from app.api import test_api
 from app.core.config import settings
 from app.db import engine
 from app.models import Base
+
+_startup_logger = logging.getLogger("api")
 
 app = FastAPI(
     title="AgriPredictAI",
@@ -25,6 +29,10 @@ app = FastAPI(
 def on_startup() -> None:
     """Create database tables on startup if they do not exist."""
     Base.metadata.create_all(bind=engine)
+    _startup_logger.info(
+        "AgriPredictAI backend started | CORS origins: %s",
+        settings.CORS_ORIGINS,
+    )
 
 # CORS Middleware
 app.add_middleware(
@@ -49,8 +57,8 @@ app.include_router(alert_api.router, prefix="/api/alert", tags=["Alert"])
 app.include_router(dashboard_api.router, prefix="/api/dashboard", tags=["Dashboard"])
 app.include_router(chatbot_api.router, prefix="/api/chat", tags=["Chatbot"])
 app.include_router(voice_api.router, prefix="/api/chat", tags=["Voice"])
+app.include_router(test_api.router, prefix="/api/chat", tags=["Chatbot"])
 app.include_router(debug_api.router, tags=["Debug"])
-app.include_router(debug_router, tags=["Debug"])
 
 @app.get("/health")
 async def health_check():

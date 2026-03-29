@@ -5,12 +5,18 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 const api = axios.create({
   baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' },
+  timeout: 30000, // 30-second timeout
 });
+
+const isDev = process.env.NODE_ENV !== 'production';
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+  if (isDev) {
+    console.log(`[API] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`, config.data || '');
   }
   return config;
 });
@@ -18,6 +24,24 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (isDev) {
+      if (error.response) {
+        // Server responded with a non-2xx status
+        console.error(
+          `[API] Error ${error.response.status} on ${error.config?.method?.toUpperCase()} ${error.config?.url}:`,
+          error.response.data
+        );
+      } else if (error.request) {
+        // Request sent but no response received (network error / timeout / CORS)
+        console.error(
+          `[API] No response for ${error.config?.method?.toUpperCase()} ${error.config?.url}:`,
+          error.message
+        );
+      } else {
+        // Error setting up the request
+        console.error('[API] Request setup error:', error.message);
+      }
+    }
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
@@ -106,6 +130,12 @@ export const chatbotService = {
   voiceChat: (formData) => api.post('/api/chat/voice', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
+  testConnection: () => api.post('/api/chat/test', { message: 'ping' }),
+};
+
+// Health
+export const healthService = {
+  check: () => api.get('/health'),
 };
 
 export default api;

@@ -80,6 +80,7 @@ def chat(payload: ChatRequest) -> ChatResponse:
         "Chat request | session=%s lang=%s msg_len=%d",
         session_id, payload.language, len(payload.message),
     )
+    logger.debug("Chat request body | session=%s msg='%.200s'", session_id, payload.message)
 
     try:
         raw = chatbot_service.process_message(
