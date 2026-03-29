@@ -11,11 +11,11 @@ Extracts:
 Logging is written to ``logs/intent_engine.log`` via the centralized logger.
 """
 import re
-import logging
 from typing import Dict, List, Optional, Any
 from datetime import date
 
 from app.core.constants import SUPPORTED_CROPS
+from app.core.logger import intent_logger as logger
 from app.core.logger import intent_logger as logger  # file-backed structured logger
 from app.utils.constants import (
     CROP_ALIASES,
@@ -157,6 +157,7 @@ def parse_intent(text: str) -> Dict[str, Any]:
     result["season"] = _detect_season(text)
 
     logger.info(
+        "Parsed intent: type=%s crops=%s state=%s season=%s | text='%s'",
         "Parsed intent: type=%s | crops=%s | state=%s | season=%s | text='%s'",
         result["intent_type"],
         result["crops"],

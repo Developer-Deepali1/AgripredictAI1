@@ -1,12 +1,10 @@
 """
 Risk Analyzer Engine – calculates risk level and profitability score for a crop.
 """
-import logging
 from datetime import date
 
 from app.core.constants import SUPPORTED_CROPS
-
-logger = logging.getLogger(__name__)
+from app.core.logger import risk_logger as logger
 
 # ---------------------------------------------------------------------------
 # Base risk scores per crop (0.0 = safest, 1.0 = riskiest)

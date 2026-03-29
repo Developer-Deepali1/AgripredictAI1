@@ -5,7 +5,6 @@ Chatbot API endpoints:
   DELETE /api/chat/history/{session_id} – clear history
   GET    /api/chat/audio/{filename}     – serve TTS audio files
 """
-import logging
 import os
 import tempfile
 import uuid
@@ -14,6 +13,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import FileResponse
 
+from app.core.logger import api_logger as logger
 from app.core.logger import api_logger as logger  # file-backed structured logger
 from app.schemas.chatbot_schema import (
     ChatRequest,
@@ -57,6 +57,9 @@ def _build_response(raw: dict, session_id: str) -> ChatResponse:
         suggestions=raw.get("suggestions", []),
         detected_language=raw.get("detected_language", "en"),
         session_id=session_id,
+        request_id=raw.get("request_id"),
+        error=raw.get("error"),
+        error_code=raw.get("error_code"),
     )
 
 
@@ -73,6 +76,11 @@ def chat(payload: ChatRequest) -> ChatResponse:
     ``request_id`` so callers can correlate failures with server logs.
     """
     session_id = payload.session_id or str(uuid.uuid4())
+
+    logger.info(
+        "Chat request | session=%s lang=%s msg_len=%d",
+        session_id, payload.language, len(payload.message),
+    )
 
     try:
         raw = chatbot_service.process_message(
@@ -99,6 +107,20 @@ def chat(payload: ChatRequest) -> ChatResponse:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={
+                "error": "I encountered an error processing your request. Please try again.",
+                "error_code": "UNK_001",
+            },
+        )
+
+    if raw.get("error_code"):
+        logger.warning(
+            "Chat request completed with error | session=%s error_code=%s request_id=%s",
+            session_id, raw.get("error_code"), raw.get("request_id"),
+        )
+    else:
+        logger.info(
+            "Chat request completed | session=%s request_id=%s",
+            session_id, raw.get("request_id"),
                 "error": "An unexpected error occurred. Please try again.",
                 "error_code": "UNK_001",
                 "details": {"exception": str(exc)},

@@ -1,14 +1,12 @@
 """
 Comparison Engine – runs "what-if" analysis for multiple crops.
 """
-import logging
 from datetime import date
 from typing import List, Optional, Dict, Any
 
 from app.core.constants import SUPPORTED_CROPS
+from app.core.logger import comparison_logger as logger
 from app.engines import risk_analyzer
-
-logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Base prices per kg (INR) – mirrors prediction_api.py

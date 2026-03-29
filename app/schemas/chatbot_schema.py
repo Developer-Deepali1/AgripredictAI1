@@ -44,6 +44,9 @@ class ChatResponse(BaseModel):
     suggestions: List[str] = []
     detected_language: str = "en"
     session_id: str
+    request_id: Optional[str] = None
+    error: Optional[str] = None
+    error_code: Optional[str] = None
 
 
 class VoiceChatResponse(ChatResponse):

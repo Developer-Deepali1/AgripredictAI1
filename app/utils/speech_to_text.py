@@ -7,11 +7,10 @@ Priority order:
   2. SpeechRecognition library (Google Web Speech API, free)
   3. Returns empty string + logs warning on failure.
 """
-import logging
 import os
 from typing import Tuple
 
-logger = logging.getLogger(__name__)
+from app.core.logger import stt_logger as logger
 
 
 def _lang_code_to_bcp47(lang: str) -> str:

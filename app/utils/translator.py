@@ -6,7 +6,6 @@ or the translation fails.
 
 Logging is written to ``logs/translator.log`` via the centralized logger.
 """
-import logging
 from functools import lru_cache
 
 from app.core.logger import translator_logger as logger
@@ -59,6 +58,15 @@ def translate_text(text: str, src: str, dest: str) -> str:
         return text
 
     try:
+        result = translator.translate(text, src=gt_src, dest=gt_dest)
+        translated = result.text if result and result.text else text
+        logger.debug(
+            "Translated (%s→%s): '%s' → '%s'",
+            src, dest, text[:60], translated[:60],
+        )
+        return translated
+    except Exception as exc:
+        logger.warning("Translation failed (%s→%s): %s | input='%s'", src, dest, exc, text[:60])
         logger.debug("Translating (%s→%s): '%s'", src, dest, text[:80])
         result = t.translate(text, src=gt_src, dest=gt_dest)
         translated = result.text if result and result.text else text
