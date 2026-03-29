@@ -3,12 +3,13 @@ Translation utility.
 Uses googletrans (free, no API key) with an in-memory cache.
 Gracefully falls back to the original text when the library is unavailable
 or the translation fails.
+
+Logging is written to ``logs/translator.log`` via the centralized logger.
 """
 import logging
 from functools import lru_cache
-from typing import Optional
 
-logger = logging.getLogger(__name__)
+from app.core.logger import translator_logger as logger
 
 # Language-code mapping for googletrans
 _LANG_MAP = {
@@ -52,14 +53,20 @@ def translate_text(text: str, src: str, dest: str) -> str:
     gt_src = _LANG_MAP.get(src, "en")
     gt_dest = _LANG_MAP.get(dest, "en")
 
-    translator = _translator_instance()
-    if translator is None:
-        logger.debug("googletrans not available; returning original text")
+    t = _translator_instance()
+    if t is None:
+        logger.debug("googletrans not available; returning original text (%s→%s)", src, dest)
         return text
 
     try:
-        result = translator.translate(text, src=gt_src, dest=gt_dest)
-        return result.text if result and result.text else text
+        logger.debug("Translating (%s→%s): '%s'", src, dest, text[:80])
+        result = t.translate(text, src=gt_src, dest=gt_dest)
+        translated = result.text if result and result.text else text
+        logger.debug("Translation result (%s→%s): '%s'", src, dest, translated[:80])
+        return translated
     except Exception as exc:
-        logger.warning("Translation failed (%s→%s): %s", src, dest, exc)
+        logger.warning(
+            "Translation failed (%s→%s) for text='%s': %s",
+            src, dest, text[:80], exc,
+        )
         return text
