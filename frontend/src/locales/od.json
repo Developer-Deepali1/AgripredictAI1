@@ -26,6 +26,29 @@
       "dataSources": "ତଥ୍ୟ ଉତ୍ସ"
     }
   },
+  "dashboard": {
+    "welcomeBack": "ପୁଣି ସ୍ୱାଗତ",
+    "overview": "ଆଜି ଆପଣଙ୍କ କୃଷି ବୁଦ୍ଧିମତ୍ତା ସମୀକ୍ଷା",
+    "trackedCrops": "ଟ୍ରାକ ହୋଇଥିବା ଫସଲ",
+    "activeAlerts": "ସକ୍ରିୟ ସତର୍କତା",
+    "profitEstimate": "ଲାଭ ଆକଳନ",
+    "riskLevel": "ଜୋଖିମ ସ୍ତର",
+    "inYourProfile": "ଆପଣଙ୍କ ପ୍ରୋଫାଇଲରେ",
+    "needsAttention": "ଧ୍ୟାନ ଦରକାର",
+    "thisSeason": "ଏହି ଋତୁ",
+    "portfolioRisk": "ପୋର୍ଟଫୋଲିଓ ଜୋଖିମ",
+    "priceTrends": "ମୂଲ୍ୟ ଧାରା ସମୀକ୍ଷା",
+    "viewDetails": "ବିବରଣୀ ଦେଖନ୍ତୁ",
+    "topPicks": "ଶ୍ରେଷ୍ଠ ବାଛ",
+    "viewAll": "ସମସ୍ତ",
+    "recentAlerts": "ସମ୍ପ୍ରତି ସତର୍କତା",
+    "viewAll2": "ସମସ୍ତ ଦେଖନ୍ତୁ",
+    "quickActions": "ଦ୍ରୁତ କାର୍ଯ୍ୟ",
+    "checkFeasibility": "ସମ୍ଭାବ୍ୟତା ଯାଞ୍ଚ",
+    "profitAnalysis": "ଲାଭ ବିଶ୍ଳେଷଣ",
+    "runSimulation": "ସିମୁଲେସନ ଚଲାନ୍ତୁ",
+    "riskAssessment": "ଜୋଖିମ ମୂଲ୍ୟାଙ୍କନ"
+  },
   "chat": {
     "title": "AgriPredict AI",
     "subtitle": "ଚାଷୀ ସହାୟକ",

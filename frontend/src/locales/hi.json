@@ -26,6 +26,29 @@
       "dataSources": "डेटा स्रोत"
     }
   },
+  "dashboard": {
+    "welcomeBack": "वापस स्वागत है",
+    "overview": "आज के लिए आपकी कृषि बुद्धिमत्ता का अवलोकन",
+    "trackedCrops": "ट्रैक की गई फसलें",
+    "activeAlerts": "सक्रिय अलर्ट",
+    "profitEstimate": "लाभ अनुमान",
+    "riskLevel": "जोखिम स्तर",
+    "inYourProfile": "आपकी प्रोफ़ाइल में",
+    "needsAttention": "ध्यान चाहिए",
+    "thisSeason": "इस सीजन",
+    "portfolioRisk": "पोर्टफोलियो जोखिम",
+    "priceTrends": "मूल्य प्रवृत्ति अवलोकन",
+    "viewDetails": "विवरण देखें",
+    "topPicks": "शीर्ष चयन",
+    "viewAll": "सभी",
+    "recentAlerts": "हाल के अलर्ट",
+    "viewAll2": "सभी देखें",
+    "quickActions": "त्वरित कार्य",
+    "checkFeasibility": "व्यावहारिकता जांचें",
+    "profitAnalysis": "लाभ विश्लेषण",
+    "runSimulation": "सिमुलेशन चलाएं",
+    "riskAssessment": "जोखिम मूल्यांकन"
+  },
   "chat": {
     "title": "AgriPredict AI",
     "subtitle": "किसान सहायक",

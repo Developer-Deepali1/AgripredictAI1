@@ -5,6 +5,7 @@ import { CssBaseline, Box } from '@mui/material';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import Sidebar, { EXPANDED_WIDTH, COLLAPSED_WIDTH } from './components/Layout/Sidebar';
+import Header from './components/Header/Header';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
@@ -69,7 +70,7 @@ function ProtectedRoute({ children }) {
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 }
 
-function AppLayout({ children }) {
+function AppLayout({ children, pageTitle }) {
   const { sidebarCollapsed } = useAuth();
   const drawerWidth = sidebarCollapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH;
 
@@ -92,6 +93,7 @@ function AppLayout({ children }) {
           pt: { xs: 7, sm: 3 },
         }}
       >
+        <Header title={pageTitle} />
         {children}
       </Box>
     </Box>

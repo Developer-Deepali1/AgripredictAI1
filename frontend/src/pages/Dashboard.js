@@ -13,6 +13,8 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import { t } from '../utils/i18n';
 import { dashboardService } from '../services/api';
 
 const MOCK_PRICE_TRENDS = [
@@ -63,6 +65,7 @@ function StatCard({ title, value, icon, color, subtitle }) {
 
 export default function Dashboard() {
   const { user, userProfile } = useAuth();
+  useLanguage(); // subscribe to language changes so t() returns updated translations
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState(null);
@@ -99,11 +102,11 @@ export default function Dashboard() {
       {/* Header */}
       <Box sx={{ mb: 3 }}>
         <Typography variant="h4" fontWeight={700} color="primary.main">
-          Welcome back, {user?.name || 'Farmer'} 👋
+          {t('dashboard.welcomeBack')}, {user?.name || t('sidebar.farmer')} 👋
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mt: 0.5 }}>
           <Typography variant="body1" color="text.secondary">
-            Here's your farm intelligence overview for today
+            {t('dashboard.overview')}
           </Typography>
           {locationLabel && (
             <Chip
@@ -122,16 +125,16 @@ export default function Dashboard() {
       {/* Stats */}
       <Grid container spacing={3} mb={3}>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Tracked Crops" value={stats.total_crops || 8} icon={<NatureIcon />} color="success" subtitle="In your profile" />
+          <StatCard title={t('dashboard.trackedCrops')} value={stats.total_crops || 8} icon={<NatureIcon />} color="success" subtitle={t('dashboard.inYourProfile')} />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Active Alerts" value={stats.active_alerts || 3} icon={<NotificationsIcon />} color="warning" subtitle="Needs attention" />
+          <StatCard title={t('dashboard.activeAlerts')} value={stats.active_alerts || 3} icon={<NotificationsIcon />} color="warning" subtitle={t('dashboard.needsAttention')} />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Profit Estimate" value={stats.profit_estimate || '₹1.2L'} icon={<AttachMoneyIcon />} color="primary" subtitle="This season" />
+          <StatCard title={t('dashboard.profitEstimate')} value={stats.profit_estimate || '₹1.2L'} icon={<AttachMoneyIcon />} color="primary" subtitle={t('dashboard.thisSeason')} />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Risk Level" value={stats.risk_level || 'MEDIUM'} icon={<WarningAmberIcon />} color="warning" subtitle="Portfolio risk" />
+          <StatCard title={t('dashboard.riskLevel')} value={stats.risk_level || 'MEDIUM'} icon={<WarningAmberIcon />} color="warning" subtitle={t('dashboard.portfolioRisk')} />
         </Grid>
       </Grid>
 
@@ -141,8 +144,8 @@ export default function Dashboard() {
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6" fontWeight={600}>Price Trends Overview</Typography>
-                <Button size="small" onClick={() => navigate('/predictions')}>View Details</Button>
+                <Typography variant="h6" fontWeight={600}>{t('dashboard.priceTrends')}</Typography>
+                <Button size="small" onClick={() => navigate('/predictions')}>{t('dashboard.viewDetails')}</Button>
               </Box>
               <ResponsiveContainer width="100%" height={260}>
                 <LineChart data={MOCK_PRICE_TRENDS}>
@@ -165,8 +168,8 @@ export default function Dashboard() {
           <Card sx={{ height: '100%' }}>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6" fontWeight={600}>Top Picks</Typography>
-                <Button size="small" onClick={() => navigate('/recommendations')}>All</Button>
+                <Typography variant="h6" fontWeight={600}>{t('dashboard.topPicks')}</Typography>
+                <Button size="small" onClick={() => navigate('/recommendations')}>{t('dashboard.viewAll')}</Button>
               </Box>
               {MOCK_RECOMMENDATIONS.map((r) => (
                 <Box key={r.crop} sx={{ mb: 2, p: 1.5, bgcolor: '#F0FDF4', borderRadius: 2 }}>
@@ -190,8 +193,8 @@ export default function Dashboard() {
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                <Typography variant="h6" fontWeight={600}>Recent Alerts</Typography>
-                <Button size="small" onClick={() => navigate('/alerts')}>View All</Button>
+                <Typography variant="h6" fontWeight={600}>{t('dashboard.recentAlerts')}</Typography>
+                <Button size="small" onClick={() => navigate('/alerts')}>{t('dashboard.viewAll2')}</Button>
               </Box>
               {locationLabel && (
                 <Chip icon={<LocationOnIcon />} label={`Showing alerts for ${userProfile.district || userProfile.location}`} size="small" color="success" variant="outlined" sx={{ mb: 1.5 }} />
@@ -220,15 +223,15 @@ export default function Dashboard() {
         <Grid item xs={12} md={6}>
           <Card>
             <CardContent>
-              <Typography variant="h6" fontWeight={600} mb={2}>Quick Actions</Typography>
+              <Typography variant="h6" fontWeight={600} mb={2}>{t('dashboard.quickActions')}</Typography>
               <Grid container spacing={1.5}>
                 {[
-                  { label: 'Check Feasibility', path: '/feasibility', icon: <NatureIcon />, color: 'primary' },
-                  { label: 'Profit Analysis', path: '/profit', icon: <AttachMoneyIcon />, color: 'success' },
-                  { label: 'Run Simulation', path: '/simulator', icon: <TrendingUpIcon />, color: 'info' },
-                  { label: 'Risk Assessment', path: '/risk', icon: <WarningAmberIcon />, color: 'warning' },
+                  { labelKey: 'dashboard.checkFeasibility', path: '/feasibility', icon: <NatureIcon />, color: 'primary' },
+                  { labelKey: 'dashboard.profitAnalysis', path: '/profit', icon: <AttachMoneyIcon />, color: 'success' },
+                  { labelKey: 'dashboard.runSimulation', path: '/simulator', icon: <TrendingUpIcon />, color: 'info' },
+                  { labelKey: 'dashboard.riskAssessment', path: '/risk', icon: <WarningAmberIcon />, color: 'warning' },
                 ].map((a) => (
-                  <Grid item xs={6} key={a.label}>
+                  <Grid item xs={6} key={a.labelKey}>
                     <Button
                       fullWidth
                       variant="outlined"
@@ -237,7 +240,7 @@ export default function Dashboard() {
                       onClick={() => navigate(a.path)}
                       sx={{ py: 1.5, borderRadius: 2 }}
                     >
-                      {a.label}
+                      {t(a.labelKey)}
                     </Button>
                   </Grid>
                 ))}

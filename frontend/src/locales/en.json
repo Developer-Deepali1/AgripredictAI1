@@ -26,6 +26,29 @@
       "dataSources": "Data Sources"
     }
   },
+  "dashboard": {
+    "welcomeBack": "Welcome back",
+    "overview": "Here's your farm intelligence overview for today",
+    "trackedCrops": "Tracked Crops",
+    "activeAlerts": "Active Alerts",
+    "profitEstimate": "Profit Estimate",
+    "riskLevel": "Risk Level",
+    "inYourProfile": "In your profile",
+    "needsAttention": "Needs attention",
+    "thisSeason": "This season",
+    "portfolioRisk": "Portfolio risk",
+    "priceTrends": "Price Trends Overview",
+    "viewDetails": "View Details",
+    "topPicks": "Top Picks",
+    "viewAll": "All",
+    "recentAlerts": "Recent Alerts",
+    "viewAll2": "View All",
+    "quickActions": "Quick Actions",
+    "checkFeasibility": "Check Feasibility",
+    "profitAnalysis": "Profit Analysis",
+    "runSimulation": "Run Simulation",
+    "riskAssessment": "Risk Assessment"
+  },
   "chat": {
     "title": "AgriPredict AI",
     "subtitle": "Farmer Assistant",
