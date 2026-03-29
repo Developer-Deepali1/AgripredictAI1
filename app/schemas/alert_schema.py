@@ -1,7 +1,6 @@
 """Alert Pydantic schemas"""
 from pydantic import BaseModel
-from typing import List, Optional
-from datetime import datetime
+from typing import Optional
 
 class Alert(BaseModel):
     id: int
@@ -13,11 +12,10 @@ class Alert(BaseModel):
     is_active: bool
 
 class AlertSettingsRequest(BaseModel):
-    price_drop_threshold: float = 10.0
-    price_spike_threshold: float = 20.0
-    enable_weather_alerts: bool = True
-    enable_disease_alerts: bool = True
-    crops_to_monitor: List[str] = []
+    price_drop: bool = True
+    demand_spike: bool = True
+    weather: bool = True
+    email: bool = False
 
 class AlertSettingsResponse(BaseModel):
     message: str

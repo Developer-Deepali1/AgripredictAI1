@@ -1,53 +1,213 @@
 /* ============================================================
-   Agricultural Theme – Beautiful Gradient Backgrounds
+   AgripredictAI – Agricultural Theme Backgrounds
+   Palette:
+     Deep forest  : #022c22  #064e3b  #065f46
+     Field green  : #047857  #059669  #10b981  #34d399
+     Harvest gold : #b45309  #d97706  #f59e0b  #fbbf24
+     Sky / water  : #0369a1  #0ea5e9  #7dd3fc
+     Earth / soil : #78350f  #92400e
+     Mint / foam  : #a7f3d0  #d1fae5  #ecfdf5  #f0fdf4
    ============================================================ */
 
-/* Animated gradient background for the whole app */
+/* ── Keyframes ─────────────────────────────────────────────── */
+
+/* Wide-pan animated gradient (app shell background)           */
 @keyframes gradientShift {
-  0%   { background-position: 0% 50%; }
+  0%   { background-position: 0%   50%; }
   50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  100% { background-position: 0%   50%; }
 }
 
+/* Slow diagonal sweep (login hero)                           */
+@keyframes loginShimmer {
+  0%   { background-position: 0%   0%;   }
+  50%  { background-position: 100% 100%; }
+  100% { background-position: 0%   0%;   }
+}
+
+/* Gentle vertical float for decorative/icon elements          */
+@keyframes float {
+  0%,  100% { transform: translateY(0);    }
+  50%        { transform: translateY(-8px); }
+}
+
+/* Soft pulsing glow for accent badges / chips                 */
+@keyframes agriPulse {
+  0%,  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.40); }
+  50%        { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);  }
+}
+
+/* ── App shell background ──────────────────────────────────── */
+
+/* Full-screen animated canvas blending field greens,
+   harvest gold, and a touch of morning sky blue.              */
 .app-background {
-  background: linear-gradient(-45deg, #064e3b, #065f46, #047857, #059669, #10b981, #34d399, #6ee7b7, #d1fae5);
+  background: linear-gradient(
+    -45deg,
+    #022c22,   /* deep forest   */
+    #064e3b,   /* dark green    */
+    #047857,   /* mid green     */
+    #059669,   /* emerald       */
+    #0ea5e9,   /* sky blue      */
+    #10b981,   /* fresh green   */
+    #d97706,   /* harvest amber */
+    #34d399    /* light green   */
+  );
   background-size: 600% 600%;
-  animation: gradientShift 24s ease infinite;
+  animation: gradientShift 28s ease infinite;
   min-height: 100vh;
 }
 
-/* Subtle leaf/dot-pattern overlay */
+/* Multi-layer overlay:
+   1. Top-left radial glow  (morning sun over fields)
+   2. Bottom-right glow     (earthy warmth)
+   3. Fine dot grid         (crop-row texture hint)           */
 .app-background::before {
   content: '';
   position: fixed;
   inset: 0;
   background-image:
-    radial-gradient(circle at 20% 30%, rgba(16, 185, 129, 0.12) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(52, 211, 153, 0.10) 0%, transparent 50%),
-    radial-gradient(circle, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 32px 32px;
+    radial-gradient(ellipse at 15% 20%, rgba(251, 191, 36, 0.14) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 75%, rgba(16, 185, 129, 0.14) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 50%, rgba(14, 165, 233, 0.07) 0%, transparent 60%),
+    radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 36px 36px;
   pointer-events: none;
   z-index: 0;
 }
 
-/* Ensure page content sits above the pattern */
+/* Page content sits above the overlay                         */
 .app-background > * {
   position: relative;
   z-index: 1;
 }
 
-/* Login / public pages – rich deep-green gradient */
+/* ── Login / registration page ────────────────────────────── */
+
+/* Rich diagonal gradient evoking a sunrise over a paddy field */
 .login-background {
-  background: linear-gradient(135deg, #022c22 0%, #064e3b 30%, #065f46 60%, #10b981 100%);
+  background: linear-gradient(
+    135deg,
+    #022c22 0%,
+    #064e3b 25%,
+    #065f46 45%,
+    #047857 65%,
+    #b45309 85%,
+    #d97706 100%
+  );
+  background-size: 300% 300%;
+  animation: loginShimmer 20s ease infinite;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  overflow: hidden;
 }
 
-/* Page-level subtle background used inside the main content area */
+/* Subtle diagonal field-row lines on the login canvas         */
+.login-background::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.03) 0px,
+      rgba(255, 255, 255, 0.03) 2px,
+      transparent 2px,
+      transparent 40px
+    );
+  pointer-events: none;
+}
+
+/* ── Main content area background ─────────────────────────── */
+
+/* Light, warm-tinted mint — easy on the eyes for data pages   */
 .page-background {
-  background: linear-gradient(160deg, #f0fdf4 0%, #ecfdf5 60%, #d1fae5 100%);
+  background: linear-gradient(
+    160deg,
+    #f0fdf4 0%,
+    #ecfdf5 40%,
+    #fef3c7 70%,   /* whisper of golden wheat */
+    #d1fae5 100%
+  );
   border-radius: 16px;
   padding: 24px;
+}
+
+/* ── Dashboard shell (inside the authenticated layout) ─────── */
+
+/* Neutral off-white with a very gentle green wash              */
+.dashboard-background {
+  background: linear-gradient(175deg, #f8fffe 0%, #f0fdf4 50%, #ecfdf5 100%);
+  min-height: 100vh;
+}
+
+/* ── Hero / banner sections ───────────────────────────────── */
+
+/* Dramatic sky-to-field gradient for feature hero areas       */
+.hero-background {
+  background: linear-gradient(
+    160deg,
+    #0c4a6e 0%,   /* deep sky */
+    #0369a1 20%,
+    #065f46 55%,  /* merges into field green */
+    #047857 80%,
+    #10b981 100%
+  );
+  padding: 48px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-background::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(to bottom, transparent, rgba(240, 253, 244, 0.6));
+  pointer-events: none;
+}
+
+/* ── Harvest / warm accent gradient ───────────────────────── */
+
+/* Golden-amber strip — use for seasonal banners, alert cards  */
+.harvest-gradient {
+  background: linear-gradient(
+    135deg,
+    #78350f 0%,
+    #92400e 20%,
+    #b45309 45%,
+    #d97706 70%,
+    #f59e0b 100%
+  );
+}
+
+/* ── Agricultural panel (glassmorphism, green-tinted) ─────── */
+
+/* Drop over any gradient background for a frosted-glass panel */
+.agri-panel {
+  background: rgba(240, 253, 244, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(167, 243, 208, 0.50);
+  box-shadow:
+    0 4px 24px rgba(6, 78, 59, 0.10),
+    0 1px 4px  rgba(6, 78, 59, 0.06);
+  border-radius: 16px;
+}
+
+/* ── Utility helpers ───────────────────────────────────────── */
+
+/* Apply the float animation to any decorative icon / image    */
+.float-icon {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Apply the pulse glow to badges, notification dots, etc.     */
+.agri-pulse {
+  animation: agriPulse 2.4s ease-in-out infinite;
 }

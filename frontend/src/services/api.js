@@ -88,9 +88,9 @@ export const simulationService = {
 
 // Alerts
 export const alertsService = {
-  get: (params) => api.get('/api/alerts/get', { params }),
-  updateSettings: (data) => api.put('/api/alerts/settings', data),
-  getHistory: (params) => api.get('/api/alerts/history', { params }),
+  get: (params) => api.get('/api/alert/', { params }),
+  updateSettings: (data) => api.put('/api/alert/settings', data),
+  getHistory: (params) => api.get('/api/alert/history', { params }),
 };
 
 // Dashboard
