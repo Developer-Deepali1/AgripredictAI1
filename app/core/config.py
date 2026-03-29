@@ -32,7 +32,12 @@ class Settings(BaseSettings):
     ]
     
     # Security Settings
-    SECRET_KEY: str = Field(..., min_length=32)
+    # A default development key is provided so the app starts without a .env file.
+    # Override SECRET_KEY in .env (or environment) with a strong random value for production.
+    SECRET_KEY: str = Field(
+        default="agripredict-dev-secret-key-change-in-production-32chars",
+        min_length=32,
+    )
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7

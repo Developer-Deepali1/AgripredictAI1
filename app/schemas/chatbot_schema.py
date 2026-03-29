@@ -9,7 +9,7 @@ class ChatRequest(BaseModel):
     """Request schema for chat endpoint"""
     message: str = Field(..., min_length=1, max_length=1000, description="User message")
     language: str = Field(default="en", description="Language code: en, hi, od")
-    session_id: str = Field(..., min_length=1, max_length=100, description="Session identifier")
+    session_id: Optional[str] = Field(default=None, min_length=1, max_length=100, description="Session identifier")
 
 
 class StructuredCropData(BaseModel):

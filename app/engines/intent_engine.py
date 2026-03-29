@@ -41,7 +41,7 @@ _RECOMMEND_PAT = re.compile(
     r"\b(recommend|suggest|best\s+crop|which\s+crop|what\s+crop|should\s+i\s+(grow|plant|sow))\b",
     re.I,
 )
-_RISK_PAT = re.compile(r"\b(risk|danger|safe|unsafe|hazard)\b", re.I)
+_RISK_PAT = re.compile(r"\b(risks?|danger|safe|unsafe|hazard)\b", re.I)
 _PROFIT_PAT = re.compile(r"\b(profit|profitable|earn|income|return|revenue|benefit)\b", re.I)
 _WHATIF_PAT = re.compile(r"\b(what\s+if|if\s+i\s+(grow|plant|sow)|scenario)\b", re.I)
 _PRICE_PAT  = re.compile(r"\b(price|cost|rate|market\s+price|msp|mandi)\b", re.I)
@@ -157,7 +157,6 @@ def parse_intent(text: str) -> Dict[str, Any]:
     result["season"] = _detect_season(text)
 
     logger.info(
-        "Parsed intent: type=%s crops=%s state=%s season=%s | text='%s'",
         "Parsed intent: type=%s | crops=%s | state=%s | season=%s | text='%s'",
         result["intent_type"],
         result["crops"],

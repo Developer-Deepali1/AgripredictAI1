@@ -5,10 +5,33 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 const api = axios.create({
   baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' },
-  timeout: 30000, // 30-second timeout
+  timeout: 60000, // 60-second timeout for AI processing
 });
 
 const isDev = process.env.NODE_ENV !== 'production';
+
+// Retry a request function with exponential backoff
+const retryRequest = async (fn, retries = 3, delay = 1000) => {
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      const isNetworkError = !err.response;
+      const isServerError = err.response && err.response.status >= 500;
+      const isLastAttempt = attempt === retries - 1;
+
+      if ((!isNetworkError && !isServerError) || isLastAttempt) {
+        throw err;
+      }
+
+      if (isDev) {
+        console.warn(`[API] Retry attempt ${attempt + 1}/${retries - 1} after ${delay}ms`, err.message);
+      }
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      delay *= 2; // exponential backoff
+    }
+  }
+};
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
@@ -124,7 +147,7 @@ export const dashboardService = {
 
 // Chatbot
 export const chatbotService = {
-  chat: (data) => api.post('/api/chat/', data),
+  chat: (data) => retryRequest(() => api.post('/api/chat/', data)),
   getHistory: (sessionId) => api.get(`/api/chat/history/${sessionId}`),
   clearHistory: (sessionId) => api.delete(`/api/chat/history/${sessionId}`),
   voiceChat: (formData) => api.post('/api/chat/voice', formData, {
