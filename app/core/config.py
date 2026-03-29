@@ -21,7 +21,15 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./agripredict.db"
     
     # CORS Settings
-    CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8000"]
+    # NOTE: The wildcard "*" below is intentional for local development convenience.
+    # Override CORS_ORIGINS via environment variable in production to restrict allowed origins.
+    CORS_ORIGINS: List[str] = [
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:8000",
+        "*",  # Allow all in dev; restrict in production via env var
+    ]
     
     # Security Settings
     SECRET_KEY: str = Field(..., min_length=32)

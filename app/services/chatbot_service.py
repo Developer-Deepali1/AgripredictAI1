@@ -124,6 +124,7 @@ def process_message(
                 ErrorCode.LANGUAGE_DETECTION_FAILED,
                 f"Failed to detect language: {exc}",
                 {"input_language": language, "message_sample": message[:50]},
+                request_id=request_id,
             ) from exc
 
         # ------------------------------------------------------------------
@@ -140,6 +141,7 @@ def process_message(
                 ErrorCode.TRANSLATION_FAILED,
                 f"Failed to translate input: {exc}",
                 {"source_lang": detected_language, "target_lang": "en"},
+                request_id=request_id,
             ) from exc
 
         # ------------------------------------------------------------------
@@ -170,6 +172,7 @@ def process_message(
                 ErrorCode.INTENT_EXTRACTION_FAILED,
                 f"Failed to extract intent: {exc}",
                 {"english_text": en_message_enriched[:100]},
+                request_id=request_id,
             ) from exc
 
         month = date.today().month
@@ -266,6 +269,7 @@ def process_message(
                 ErrorCode.RESPONSE_GENERATION_FAILED,
                 f"Failed to generate response: {exc}",
                 {"intent_type": intent_type, "crops": crops},
+                request_id=request_id,
             ) from exc
 
         # ------------------------------------------------------------------

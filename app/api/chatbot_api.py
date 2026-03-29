@@ -98,7 +98,7 @@ def chat(payload: ChatRequest) -> ChatResponse:
                 "error": exc.message,
                 "error_code": exc.error_code.value,
                 "details": exc.details,
-                "request_id": exc.request_id or "",
+                "request_id": exc.request_id or session_id,
             },
         )
     except Exception as exc:
