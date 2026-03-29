@@ -14,6 +14,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import FileResponse
 
+from app.core.logger import api_logger as logger  # file-backed structured logger
 from app.schemas.chatbot_schema import (
     ChatRequest,
     ChatResponse,
@@ -23,8 +24,7 @@ from app.schemas.chatbot_schema import (
     StructuredCropData,
 )
 from app.services import chatbot_service, conversation_memory
-
-logger = logging.getLogger(__name__)
+from app.utils.error_handler import ChatbotException
 router = APIRouter()
 
 # Directory where TTS audio files are stored (must match text_to_speech.py)
@@ -68,8 +68,10 @@ def _build_response(raw: dict, session_id: str) -> ChatResponse:
 def chat(payload: ChatRequest) -> ChatResponse:
     """
     Process a text message from a farmer and return an AI-generated response.
+
+    On unexpected errors the response includes an ``error_code`` and
+    ``request_id`` so callers can correlate failures with server logs.
     """
-    # Generate a session_id if not provided (shouldn't happen due to schema validation)
     session_id = payload.session_id or str(uuid.uuid4())
 
     try:
@@ -78,11 +80,29 @@ def chat(payload: ChatRequest) -> ChatResponse:
             language=payload.language,
             session_id=session_id,
         )
-    except Exception as exc:
-        logger.exception("Chatbot processing error: %s", exc)
+    except ChatbotException as exc:
+        logger.error(
+            "ChatbotException [%s] %s: %s | details=%s",
+            exc.request_id, exc.error_code.value, exc.message, exc.details,
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="I encountered an error processing your request. Please try again.",
+            detail={
+                "error": exc.message,
+                "error_code": exc.error_code.value,
+                "details": exc.details,
+                "request_id": exc.request_id or "",
+            },
+        )
+    except Exception as exc:
+        logger.exception("Unexpected chatbot processing error: %s", exc)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "error": "An unexpected error occurred. Please try again.",
+                "error_code": "UNK_001",
+                "details": {"exception": str(exc)},
+            },
         )
 
     return _build_response(raw, session_id)

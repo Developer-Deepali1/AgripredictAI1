@@ -211,3 +211,5 @@ __marimo__/
 # Frontend
 frontend/node_modules/
 frontend/build/
+# Log files (keep directory placeholder)
+logs/*.log
