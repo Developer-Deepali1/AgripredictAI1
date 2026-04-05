@@ -21,6 +21,9 @@
       "profit": "लाभ विश्लेषण",
       "risk": "जोखिम मूल्यांकन",
       "recommendations": "स्मार्ट सुझाव",
+      "cropPrediction": "फसल पूर्वानुमान",
+      "rotation": "फसल चक्र",
+      "iot": "IoT निगरानी",
       "simulator": "सिम्युलेटर",
       "alerts": "अलर्ट",
       "dataSources": "डेटा स्रोत"

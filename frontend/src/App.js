@@ -7,6 +7,7 @@ import { LanguageProvider } from './context/LanguageContext';
 import Sidebar, { EXPANDED_WIDTH, COLLAPSED_WIDTH } from './components/Layout/Sidebar';
 import Header from './components/Header/Header';
 import Login from './pages/Login';
+import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import MarketPredictions from './pages/MarketPredictions';
@@ -17,6 +18,9 @@ import SmartRecommendations from './pages/SmartRecommendations';
 import Simulator from './pages/Simulator';
 import Alerts from './pages/Alerts';
 import DataSources from './pages/DataSources';
+import CropRotation from './pages/CropRotation';
+import IoTMonitoring from './pages/IoTMonitoring';
+import CropPrediction from './pages/CropPrediction';
 import ChatWindow from './components/ChatBot/ChatWindow';
 
 const theme = createTheme({
@@ -104,8 +108,9 @@ function AppRoutes() {
   const { isAuthenticated } = useAuth();
   return (
     <Routes>
+      <Route path="/landing" element={<Landing />} />
       <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
-      <Route path="/" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
+      <Route path="/" element={<Navigate to={isAuthenticated ? '/dashboard' : '/landing'} replace />} />
       <Route
         path="/dashboard"
         element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>}
@@ -133,6 +138,18 @@ function AppRoutes() {
       <Route
         path="/recommendations"
         element={<ProtectedRoute><AppLayout><SmartRecommendations /></AppLayout></ProtectedRoute>}
+      />
+      <Route
+        path="/crop-prediction"
+        element={<ProtectedRoute><AppLayout><CropPrediction /></AppLayout></ProtectedRoute>}
+      />
+      <Route
+        path="/rotation"
+        element={<ProtectedRoute><AppLayout><CropRotation /></AppLayout></ProtectedRoute>}
+      />
+      <Route
+        path="/iot"
+        element={<ProtectedRoute><AppLayout><IoTMonitoring /></AppLayout></ProtectedRoute>}
       />
       <Route
         path="/simulator"

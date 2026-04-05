@@ -18,20 +18,26 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import AgricultureIcon from '@mui/icons-material/Agriculture';
+import LoopIcon from '@mui/icons-material/Loop';
+import SensorsIcon from '@mui/icons-material/Sensors';
+import EmojiNatureIcon from '@mui/icons-material/EmojiNature';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { t } from '../../utils/i18n';
 
 const NAV_ITEM_DEFS = [
-  { key: 'dashboard',      path: '/dashboard',    icon: <DashboardIcon /> },
-  { key: 'predictions',    path: '/predictions',  icon: <TrendingUpIcon /> },
-  { key: 'feasibility',    path: '/feasibility',  icon: <NatureIcon /> },
-  { key: 'profit',         path: '/profit',       icon: <AttachMoneyIcon /> },
-  { key: 'risk',           path: '/risk',         icon: <WarningAmberIcon /> },
+  { key: 'dashboard',      path: '/dashboard',       icon: <DashboardIcon /> },
+  { key: 'predictions',    path: '/predictions',     icon: <TrendingUpIcon /> },
+  { key: 'feasibility',    path: '/feasibility',     icon: <NatureIcon /> },
+  { key: 'profit',         path: '/profit',          icon: <AttachMoneyIcon /> },
+  { key: 'risk',           path: '/risk',            icon: <WarningAmberIcon /> },
   { key: 'recommendations',path: '/recommendations', icon: <StarIcon /> },
-  { key: 'simulator',      path: '/simulator',    icon: <ScienceIcon /> },
-  { key: 'alerts',         path: '/alerts',       icon: <NotificationsIcon /> },
-  { key: 'dataSources',    path: '/data-sources', icon: <StorageIcon /> },
+  { key: 'cropPrediction', path: '/crop-prediction', icon: <EmojiNatureIcon /> },
+  { key: 'rotation',       path: '/rotation',        icon: <LoopIcon /> },
+  { key: 'iot',            path: '/iot',             icon: <SensorsIcon /> },
+  { key: 'simulator',      path: '/simulator',       icon: <ScienceIcon /> },
+  { key: 'alerts',         path: '/alerts',          icon: <NotificationsIcon /> },
+  { key: 'dataSources',    path: '/data-sources',    icon: <StorageIcon /> },
 ];
 
 export const EXPANDED_WIDTH = 250;

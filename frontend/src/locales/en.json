@@ -21,6 +21,9 @@
       "profit": "Profit Analysis",
       "risk": "Risk Assessment",
       "recommendations": "Smart Recommendations",
+      "cropPrediction": "Crop Prediction",
+      "rotation": "Crop Rotation",
+      "iot": "IoT Monitoring",
       "simulator": "Simulator",
       "alerts": "Alerts",
       "dataSources": "Data Sources"
