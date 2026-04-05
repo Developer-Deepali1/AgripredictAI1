@@ -430,7 +430,7 @@ export default function ClimateCropPredictor() {
               <CardContent sx={{ textAlign: 'center', py: 8 }}>
                 <CircularProgress color="primary" size={64} />
                 <Typography mt={2} variant="h6" color="text.secondary">
-                  Analysing climate projections…
+                  Analyzing climate projections…
                 </Typography>
                 <Typography variant="body2" color="text.secondary" mt={1}>
                   Training ML model on historical data and forecasting future conditions

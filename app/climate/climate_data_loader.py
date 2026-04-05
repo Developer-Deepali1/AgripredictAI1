@@ -190,7 +190,7 @@ def load_climate_data(
         logger.debug("Climate data cache hit for %s", ck)
         return bundle
 
-    logger.info("Loading climate data for lat=%.4f lon=%.4f", latitude, longitude)
+    logger.info("Loading climate data for the requested location")
 
     historical = _deterministic_history(latitude, longitude)
 

@@ -379,8 +379,8 @@ def recommend_crops(
     )
 
     logger.info(
-        "Top %d crops for lat=%.2f lon=%.2f: %s",
-        top_n, bundle.latitude, bundle.longitude,
+        "Top %d crops recommended for the requested location: %s",
+        top_n,
         [r.crop for r in recommendations],
     )
 

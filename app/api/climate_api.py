@@ -169,8 +169,8 @@ def predict_future_crops(payload: FutureCropRequest) -> FutureCropResponse:
       4. Return recommendations + climate summary + chart data.
     """
     logger.info(
-        "Future-crop prediction requested | lat=%.4f lon=%.4f horizon=%d",
-        payload.latitude, payload.longitude, payload.horizon_years,
+        "Future-crop prediction requested | horizon=%d",
+        payload.horizon_years,
     )
 
     # ── Step 1: Load climate data ─────────────────────────────────────────
