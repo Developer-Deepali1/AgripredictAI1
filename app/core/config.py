@@ -73,5 +73,11 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+        extra = "ignore"
+
+    def model_post_init(self, __context) -> None:
+        if self.DATABASE_URL == "your_database_url_here" or not self.DATABASE_URL:
+            self.DATABASE_URL = "sqlite:///./agripredict.db"
+
 
 settings = Settings()

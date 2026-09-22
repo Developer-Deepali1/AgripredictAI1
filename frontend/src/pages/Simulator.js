@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Box, Card, CardContent, Typography, Grid, MenuItem, TextField,
   Button, Slider, Table, TableBody, TableCell, TableContainer, TableHead,
@@ -59,15 +59,71 @@ export default function Simulator() {
   const [paramsA, setParamsA] = useState(DEFAULTS['Rice']);
   const [paramsB, setParamsB] = useState(DEFAULTS['Cotton']);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [serverComparison, setServerComparison] = useState(null);
+  const [savedScenarios, setSavedScenarios] = useState([]);
+  const [notice, setNotice] = useState(null);
 
   const handleCropAChange = (c) => { setCropA(c); setParamsA(DEFAULTS[c] || DEFAULTS.Rice); };
   const handleCropBChange = (c) => { setCropB(c); setParamsB(DEFAULTS[c] || DEFAULTS.Wheat); };
 
+  const loadSaved = () => {
+    simulationService.getSaved()
+      .then((res) => setSavedScenarios(res.data || []))
+      .catch(() => {});
+  };
+
+  useEffect(() => {
+    loadSaved();
+  }, []);
+
   const runSimulation = () => {
     setLoading(true);
-    simulationService.compare({ crop_a: cropA, crop_b: cropB, area_ha: area, params_a: paramsA, params_b: paramsB })
-      .catch(() => {}) // Use local calculation
+    setNotice(null);
+    const payload = {
+      scenario_a: {
+        crop: cropA,
+        area_ha: parseFloat(area),
+        yield_kg_ha: parseFloat(paramsA.yield),
+        price_per_kg: parseFloat(paramsA.price),
+        cost_per_ha: parseFloat(paramsA.cost),
+      },
+      scenario_b: {
+        crop: cropB,
+        area_ha: parseFloat(area),
+        yield_kg_ha: parseFloat(paramsB.yield),
+        price_per_kg: parseFloat(paramsB.price),
+        cost_per_ha: parseFloat(paramsB.cost),
+      },
+    };
+
+    simulationService.compare(payload)
+      .then((res) => {
+        setServerComparison(res.data);
+      })
+      .catch((err) => {
+        console.error('Simulation error:', err);
+      })
       .finally(() => setLoading(false));
+  };
+
+  const saveCurrentScenario = () => {
+    setSaving(true);
+    const payload = {
+      name: `${cropA} vs ${cropB} (${area} ha)`,
+      cropA,
+      cropB,
+      area,
+      winner: serverComparison?.better_scenario === 'A' ? cropA : cropB,
+      profit_diff: serverComparison?.profit_difference || Math.abs((paramsA.yield * paramsA.price - paramsA.cost) * area - (paramsB.yield * paramsB.price - paramsB.cost) * area),
+    };
+    simulationService.save(payload)
+      .then(() => {
+        setNotice('Scenario saved successfully! Continuable across sessions.');
+        loadSaved();
+      })
+      .catch((err) => console.error('Failed to save scenario:', err))
+      .finally(() => setSaving(false));
   };
 
   const chartData = useMemo(() => {
@@ -94,9 +150,17 @@ export default function Simulator() {
   return (
     <Box>
       <Typography variant="h4" fontWeight={700} color="primary.main" mb={1}>Crop Simulator</Typography>
-      <Typography variant="body1" color="text.secondary" mb={3}>Compare two crops side-by-side with variable adjustments</Typography>
+      <Typography variant="body1" color="text.secondary" mb={3}>Compare two crops side-by-side with live backend sensitivity simulations</Typography>
 
-      {/* Area Selector */}
+      {notice && (
+        <Card sx={{ mb: 2, bgcolor: '#ECFDF5', border: '1px solid #A7F3D0' }}>
+          <CardContent sx={{ py: 1.5, px: 2, '&:last-child': { pb: 1.5 } }}>
+            <Typography variant="body2" color="success.dark" fontWeight={600}>✓ {notice}</Typography>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Area & Action Selector */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Grid container spacing={2} alignItems="center">
@@ -108,9 +172,33 @@ export default function Simulator() {
                 {loading ? <CircularProgress size={20} color="inherit" /> : 'Run Simulation'}
               </Button>
             </Grid>
+            <Grid item xs={12} sm={4}>
+              <Button fullWidth variant="outlined" color="secondary" size="large" onClick={saveCurrentScenario} disabled={saving}>
+                {saving ? 'Saving…' : 'Save Scenario'}
+              </Button>
+            </Grid>
           </Grid>
         </CardContent>
       </Card>
+
+      {/* Backend Simulation Analysis Banner */}
+      {serverComparison && (
+        <Card sx={{ mb: 3, bgcolor: '#F0FDF4', border: '1px solid #BBF7D0' }}>
+          <CardContent sx={{ py: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
+              <Box>
+                <Typography variant="h6" fontWeight={700} color="success.dark">
+                  Optimal Choice: Crop {serverComparison.better_scenario} ({serverComparison.better_scenario === 'A' ? cropA : cropB})
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Generates ₹{serverComparison.profit_difference?.toLocaleString()} higher net profit compared to the alternative.
+                </Typography>
+              </Box>
+              <Chip label={`ROI: ${serverComparison[`scenario_${serverComparison.better_scenario.toLowerCase()}`]?.roi_percent}%`} color="success" sx={{ fontWeight: 700 }} />
+            </Box>
+          </CardContent>
+        </Card>
+      )}
 
       <Grid container spacing={3}>
         {/* Crop A Controls */}
@@ -209,6 +297,35 @@ export default function Simulator() {
             </CardContent>
           </Card>
         </Grid>
+
+        {/* Saved Scenarios History */}
+        {savedScenarios.length > 0 && (
+          <Grid item xs={12}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" fontWeight={600} mb={1.5}>Saved Scenarios (Continuous Planning)</Typography>
+                <Grid container spacing={1.5}>
+                  {savedScenarios.map((sc, idx) => (
+                    <Grid item xs={12} sm={6} md={4} key={idx}>
+                      <Box sx={{ p: 1.5, border: '1px solid #E5E7EB', borderRadius: 2, bgcolor: '#F9FAFB' }}>
+                        <Typography variant="subtitle2" fontWeight={700}>{sc.name}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          Saved: {sc.timestamp || 'Today'} • Area: {sc.area} ha
+                        </Typography>
+                        <Box sx={{ mt: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Chip label={`Winner: ${sc.winner}`} size="small" color="primary" />
+                          <Typography variant="caption" fontWeight={600} color="success.main">
+                            +₹{Number(sc.profit_diff || 0).toLocaleString()} diff
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Grid>
+                  ))}
+                </Grid>
+              </CardContent>
+            </Card>
+          </Grid>
+        )}
       </Grid>
     </Box>
   );

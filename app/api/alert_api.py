@@ -64,10 +64,28 @@ _ALERT_HISTORY: List[Alert] = [
 
 
 @router.get("/", response_model=List[Alert])
+@router.get("/active", response_model=List[Alert])
 def get_active_alerts() -> List[Alert]:
     """Return all currently active alerts sorted by severity and creation time."""
     severity_order = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}
     return sorted(_ACTIVE_ALERTS, key=lambda a: severity_order.get(a.severity, 4))
+
+
+@router.post("/{alert_id}/dismiss", response_model=dict)
+def dismiss_alert(alert_id: int):
+    """Dismiss/acknowledge an active alert and move it to history."""
+    global _ACTIVE_ALERTS, _ALERT_HISTORY
+    found = None
+    for a in _ACTIVE_ALERTS:
+        if a.id == alert_id:
+            found = a
+            break
+    if found:
+        _ACTIVE_ALERTS = [a for a in _ACTIVE_ALERTS if a.id != alert_id]
+        found.is_active = False
+        _ALERT_HISTORY.insert(0, found)
+        return {"status": "success", "message": f"Alert {alert_id} dismissed."}
+    return {"status": "not_found", "message": f"Alert {alert_id} not found."}
 
 
 @router.get("/history", response_model=List[Alert])

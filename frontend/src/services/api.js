@@ -110,6 +110,7 @@ export const profileService = {
 export const dataService = {
   getMandiPrices: (params) => api.get('/api/data/mandi-prices', { params }),
   getWeather: (params) => api.get('/api/data/weather', { params }),
+  getLiveWeather: (params) => api.get('/api/data/weather/live', { params }),
   getCropPatterns: (params) => api.get('/api/data/crop-patterns', { params }),
 };
 
@@ -117,6 +118,7 @@ export const dataService = {
 export const predictionService = {
   getPrices: (crop, params) => api.get(`/api/prediction/prices/${crop}`, { params }),
   getSeasonality: (crop, params) => api.get(`/api/prediction/seasonality/${crop}`, { params }),
+  recommendCropML: (data) => api.post('/api/prediction/recommend-ml', data),
 };
 
 // Feasibility
@@ -148,13 +150,18 @@ export const recommendationService = {
 export const simulationService = {
   run: (data) => api.post('/api/simulation/run', data),
   compare: (data) => api.post('/api/simulation/compare', data),
+  save: (data) => api.post('/api/simulation/save', data),
+  getSaved: () => api.get('/api/simulation/saved'),
 };
 
 // Alerts
 export const alertsService = {
   get: (params) => api.get('/api/alert/', { params }),
-  updateSettings: (data) => api.put('/api/alert/settings', data),
+  getActive: (params) => api.get('/api/alert/active', { params }),
   getHistory: (params) => api.get('/api/alert/history', { params }),
+  dismiss: (id) => api.post(`/api/alert/${id}/dismiss`),
+  updateSettings: (data) => api.put('/api/alert/settings', data),
+  testNotification: (data) => api.post('/api/alert/test-notification', data),
 };
 
 // Dashboard
@@ -211,9 +218,37 @@ export const climateService = {
   listCrops: () => api.get('/api/predict/future-crops/crops'),
 };
 
+// Crop Disease Detection & Grad-CAM (LeafLens Core)
+export const diseaseService = {
+  predict: (formData) => api.post('/api/disease/predict', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
+  submitFeedback: (data) => api.post('/api/disease/feedback', data),
+  getHistory: (limit = 20) => api.get('/api/disease/history', { params: { limit } }),
+  getCrops: () => api.get('/api/disease/crops'),
+  getSamples: () => api.get('/api/disease/samples'),
+};
+
+// Smart Irrigation & Carbon Footprint
+export const irrigationService = {
+  getAdvice: (data) => api.post('/api/irrigation/advice', data),
+  calculateCarbon: (data) => api.post('/api/irrigation/carbon-footprint', data),
+  getLanguages: () => api.get('/api/irrigation/languages'),
+};
+
+// Crop Rotation & Soil Health
+export const rotationService = {
+  getPlan: (data) => api.post('/api/rotation/plan', data),
+  getRecommendations: (farmerId, params) => api.get(`/api/rotation/recommendations/${farmerId}`, { params }),
+  analyzeSoil: (data) => api.post('/api/rotation/analyze', data),
+  getHistory: (farmId, params) => api.get(`/api/rotation/history/${farmId}`, { params }),
+  optimizePlan: (data) => api.post('/api/rotation/optimize', data),
+};
+
 // Health
 export const healthService = {
   check: () => api.get('/health'),
 };
+
 
 export default api;

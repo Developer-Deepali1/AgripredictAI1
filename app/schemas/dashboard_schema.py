@@ -1,17 +1,14 @@
 """Dashboard Pydantic schemas"""
 from pydantic import BaseModel
-from typing import List
-
-class PriceTrendItem(BaseModel):
-    crop: str
-    current_price: float
-    change_pct: float
+from typing import List, Dict, Any, Optional
 
 class DashboardSummaryResponse(BaseModel):
     total_crops: int
     active_alerts: int
+    profit_estimate: str
+    risk_level: str
     top_profit_crop: str
     risk_summary: str
-    recent_alerts: List[dict]
-    top_recommendations: List[str]
-    price_trend_data: List[PriceTrendItem]
+    recent_alerts: List[Dict[str, Any]]
+    top_recommendations: List[Dict[str, Any]]
+    price_trend_data: List[Dict[str, Any]]

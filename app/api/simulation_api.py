@@ -1,6 +1,8 @@
 """
 What-If Simulation API endpoints
 """
+from datetime import date
+from typing import List
 from fastapi import APIRouter, HTTPException, status
 
 from app.core.constants import SUPPORTED_CROPS
@@ -82,3 +84,19 @@ def compare_simulations(payload: SimulationCompareRequest) -> SimulationCompareR
         better_scenario=better,
         profit_difference=round(abs(result_a.net_profit - result_b.net_profit), 2),
     )
+
+
+_SAVED_SIMULATIONS: List[dict] = []
+
+@router.post("/save")
+def save_simulation(payload: dict):
+    """Save a scenario simulation for later retrieval and continuity."""
+    payload["timestamp"] = date.today().isoformat()
+    _SAVED_SIMULATIONS.append(payload)
+    return {"status": "saved", "count": len(_SAVED_SIMULATIONS), "data": payload}
+
+
+@router.get("/saved")
+def get_saved_simulations():
+    """Retrieve all previously saved simulation scenarios."""
+    return _SAVED_SIMULATIONS

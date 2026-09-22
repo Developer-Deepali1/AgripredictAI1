@@ -11,7 +11,6 @@ import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import EmailIcon from '@mui/icons-material/Email';
 import SmsIcon from '@mui/icons-material/Sms';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
 import { alertsService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -60,17 +59,7 @@ const TYPE_ICON = {
   'Weather Warning': <WaterDropIcon color="primary" />,
 };
 
-/**
- * Returns true if the alert matches the user's location.
- * An empty string in the alert means "any" (wildcard).
- */
-function matchesLocation(alert, userState, userDistrict, userLocalArea) {
-  if (!userState) return true; // No location set → show all
-  const stateMatch = !alert.state || alert.state === userState;
-  const districtMatch = !alert.district || alert.district === userDistrict;
-  const areaMatch = !alert.local_area || alert.local_area === userLocalArea;
-  return stateMatch && districtMatch && areaMatch;
-}
+
 
 /**
  * Mask email to show only first 2 characters and domain (e.g., fa***@example.com)
@@ -93,7 +82,7 @@ function maskPhone(phone) {
   return `${phone.slice(0, 2)}*****${phone.slice(-3)}`;
 }
 
-function AlertItem({ alert, notifyEmail, notifySms, userEmail, userPhone, alertThreshold }) {
+function AlertItem({ alert, notifyEmail, notifySms, userEmail, userPhone, alertThreshold, onDismiss }) {
   const threshold = alertThreshold || 'HIGH';
   const isNotified = meetsThreshold(alert.severity, threshold) && (notifyEmail || notifySms);
   return (
@@ -112,7 +101,7 @@ function AlertItem({ alert, notifyEmail, notifySms, userEmail, userPhone, alertT
         primary={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
             <Typography variant="body2" fontWeight={600}>{alert.message}</Typography>
-            {!alert.read && <Chip label="NEW" size="small" color="primary" sx={{ height: 18, fontSize: 10 }} />}
+            {!alert.read && <Chip label="LIVE" size="small" color="success" sx={{ height: 18, fontSize: 10 }} />}
           </Box>
         }
         secondary={
@@ -126,13 +115,17 @@ function AlertItem({ alert, notifyEmail, notifySms, userEmail, userPhone, alertT
             {isNotified && notifySms && (
               <Chip icon={<SmsIcon />} label={`SMS: ${maskPhone(userPhone)}`} size="small" color="success" variant="outlined" sx={{ fontSize: 10 }} />
             )}
-            {isNotified && (
-              <Chip icon={<CheckCircleOutlineIcon />} label="Sent" size="small" color="success" sx={{ fontSize: 10 }} />
-            )}
           </Box>
         }
       />
-      <Chip label={alert.severity} color={SEVERITY_COLOR[alert.severity]} size="small" sx={{ ml: 1 }} />
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Chip label={alert.severity} color={SEVERITY_COLOR[alert.severity] || 'warning'} size="small" />
+        {!alert.read && onDismiss && (
+          <Button size="small" variant="outlined" color="inherit" sx={{ fontSize: 11, py: 0.2 }} onClick={() => onDismiss(alert.id)}>
+            Acknowledge
+          </Button>
+        )}
+      </Box>
     </ListItem>
   );
 }
@@ -155,32 +148,48 @@ export default function Alerts() {
   const alertThreshold = userProfile?.alert_threshold || 'HIGH';
   const hasLocation = Boolean(userState && userDistrict);
 
-  useEffect(() => {
+  const formatAlert = (a) => ({
+    id: a.id,
+    type: a.alert_type ? a.alert_type.replace(/_/g, ' ') : (a.type || 'Market Alert'),
+    crop: a.crop || 'General',
+    message: a.message,
+    severity: a.severity || 'MEDIUM',
+    time: a.created_at ? new Date(a.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : (a.time || 'Active'),
+    read: a.is_active !== undefined ? !a.is_active : Boolean(a.read),
+    state: a.state || '',
+    district: a.district || '',
+  });
+
+  const loadAlerts = () => {
+    setLoading(true);
     Promise.all([
-      alertsService.get({ state: userState, district: userDistrict, local_area: userLocalArea }),
+      alertsService.get({ state: userState, district: userDistrict }),
       alertsService.getHistory({ state: userState, district: userDistrict }),
     ])
       .then(([alertsRes, historyRes]) => {
-        const apiAlerts = alertsRes.data?.alerts;
-        const apiHistory = historyRes.data?.history;
-        // Use API data if available, else filter mock data by location
-        if (apiAlerts) {
-          setAlerts(apiAlerts);
-        } else {
-          setAlerts(ALL_ALERTS.filter((a) => matchesLocation(a, userState, userDistrict, userLocalArea)));
-        }
-        if (apiHistory) {
-          setHistory(apiHistory);
-        } else {
-          setHistory(ALL_HISTORY.filter((a) => matchesLocation(a, userState, userDistrict, userLocalArea)));
-        }
+        const rawAlerts = Array.isArray(alertsRes.data) ? alertsRes.data : (alertsRes.data?.alerts || ALL_ALERTS);
+        const rawHistory = Array.isArray(historyRes.data) ? historyRes.data : (historyRes.data?.history || ALL_HISTORY);
+
+        setAlerts(rawAlerts.map(formatAlert));
+        setHistory(rawHistory.map(formatAlert));
       })
-      .catch(() => {
-        setAlerts(ALL_ALERTS.filter((a) => matchesLocation(a, userState, userDistrict, userLocalArea)));
-        setHistory(ALL_HISTORY.filter((a) => matchesLocation(a, userState, userDistrict, userLocalArea)));
+      .catch((err) => {
+        console.error('Failed to load alerts from backend:', err);
+        setAlerts(ALL_ALERTS.map(formatAlert));
+        setHistory(ALL_HISTORY.map(formatAlert));
       })
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadAlerts();
   }, [userState, userDistrict, userLocalArea]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleDismissAlert = (id) => {
+    alertsService.dismiss(id)
+      .then(() => loadAlerts())
+      .catch((err) => console.error('Failed to dismiss alert:', err));
+  };
 
   const unread = alerts.filter((a) => !a.read).length;
 
@@ -259,6 +268,7 @@ export default function Alerts() {
                         notifyEmail={notifyEmail} notifySms={notifySms}
                         userEmail={userEmail} userPhone={userPhone}
                         alertThreshold={alertThreshold}
+                        onDismiss={handleDismissAlert}
                       />
                     ))}
                   </List>

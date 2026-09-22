@@ -69,17 +69,38 @@ export default function SmartRecommendations() {
 
   const fetchRecommendations = () => {
     setLoading(true);
-    const params = {};
-    if (seasonFilter !== 'All Seasons') params.season = seasonFilter;
-    if (riskFilter !== 'All Risk Levels') params.risk_level = riskFilter;
-
-    recommendationService.getSmart(params)
-      .then((res) => setRecommendations(res.data?.recommendations || MOCK_RECOMMENDATIONS))
-      .catch(() => setRecommendations(MOCK_RECOMMENDATIONS))
+    recommendationService.getSmart({ top_n: 8 })
+      .then((res) => {
+        const raw = res.data?.recommendations || [];
+        const mapped = raw.map((r, idx) => {
+          const crop = r.crop_name || r.crop;
+          const riskLvl = r.risk_score <= 3.5 ? 'LOW' : r.risk_score <= 6.0 ? 'MEDIUM' : 'HIGH';
+          const profitStr = `₹${Math.round(r.profit_score * 900 + 15000).toLocaleString()}`;
+          const season = ['Rice', 'Cotton', 'Maize', 'Sugarcane'].includes(crop) ? 'Kharif' : 'Rabi';
+          return {
+            rank: r.recommendation_rank || idx + 1,
+            crop,
+            expected_profit: profitStr,
+            risk_level: riskLvl,
+            feasibility_score: Math.round(r.feasibility_score || 80),
+            market_demand: r.profit_score >= 70 ? 'Very High' : 'High',
+            best_season: season,
+            reasons: Array.isArray(r.reasons) && r.reasons.length > 0 ? r.reasons : [
+              'High market demand and stable MSP floor price.',
+              'Favorable climate and soil adaptability.',
+            ],
+          };
+        });
+        setRecommendations(mapped.length > 0 ? mapped : MOCK_RECOMMENDATIONS);
+      })
+      .catch((err) => {
+        console.error('Failed to load smart recommendations:', err);
+        setRecommendations(MOCK_RECOMMENDATIONS);
+      })
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { fetchRecommendations(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { fetchRecommendations(); }, [seasonFilter, riskFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const filtered = recommendations.filter((r) => {
     if (seasonFilter !== 'All Seasons' && r.best_season !== seasonFilter) return false;

@@ -14,7 +14,11 @@ from app.schemas.prediction_schema import (
     PredictedPricePoint,
     SeasonalityResponse,
     SeasonalityPattern,
+    CropRecommendationMLRequest,
+    CropRecommendationMLResponse,
 )
+from ml_models.crop_recommendation.predict import predict_crops
+from app.engines.market_prediction_engine import market_engine
 
 router = APIRouter()
 
@@ -51,51 +55,62 @@ def _normalize_crop(crop: str) -> str:
     )
 
 
+@router.post("/recommend-ml", response_model=CropRecommendationMLResponse)
+def recommend_crops_ml(payload: CropRecommendationMLRequest) -> CropRecommendationMLResponse:
+    """
+    Predict the top most suitable crops based on agronomic features using trained RandomForestClassifier.
+    Input features: Nitrogen (N), Phosphorus (P), Potassium (K), Temperature, Humidity, Soil pH, Rainfall.
+    """
+    result = predict_crops(
+        n=payload.nitrogen,
+        p=payload.phosphorus,
+        k=payload.potassium,
+        temperature=payload.temperature,
+        humidity=payload.humidity,
+        ph=payload.ph,
+        rainfall=payload.rainfall,
+        top_n=payload.top_n or 5
+    )
+    return CropRecommendationMLResponse(**result)
+
+
 @router.get("/prices/{crop}", response_model=CropPricePredictionResponse)
 def get_price_prediction(crop: str) -> CropPricePredictionResponse:
-    """Return historical and predicted prices with confidence intervals for a crop."""
+    """Return historical and ML-predicted prices with confidence intervals for a crop."""
     crop = _normalize_crop(crop)
-    rng = random.Random(hash(crop) % (2**32))
     base = _BASE_PRICES[crop]
     today = date.today()
 
     historical: List[PricePoint] = []
     for i in range(12, 0, -1):
         d = today - timedelta(days=i * 30)
-        noise = rng.uniform(-0.05, 0.05)
         season_mult = _SEASONALITY[crop][d.month - 1]
-        price = round(base * season_mult * (1 + noise), 2)
+        price = round(base * season_mult, 2)
         historical.append(PricePoint(date=d, price=price))
 
     current_price = round(base * _SEASONALITY[crop][today.month - 1], 2)
+    
+    # Use real ML market prediction engine trained on government dataset
+    ml_forecast = market_engine.predict_price(
+        crop=crop,
+        prev_price=current_price,
+        months_ahead=6
+    )
 
-    predicted: List[PredictedPricePoint] = []
-    for i in range(1, 7):
-        d = today + timedelta(days=i * 30)
-        noise = rng.uniform(-0.03, 0.08)
-        season_mult = _SEASONALITY[crop][(d.month - 1) % 12]
-        pred_price = round(base * season_mult * (1 + noise), 2)
-        margin = round(pred_price * 0.08, 2)
-        predicted.append(PredictedPricePoint(
-            date=d,
-            price=pred_price,
-            lower_bound=round(pred_price - margin, 2),
-            upper_bound=round(pred_price + margin, 2),
-        ))
-
-    last_hist = historical[-1].price
-    next_pred = predicted[0].price
-    if next_pred > last_hist * 1.02:
-        trend = "UP"
-    elif next_pred < last_hist * 0.98:
-        trend = "DOWN"
-    else:
-        trend = "STABLE"
+    predicted: List[PredictedPricePoint] = [
+        PredictedPricePoint(
+            date=p["date"],
+            price=p["price"],
+            lower_bound=p["lower_bound"],
+            upper_bound=p["upper_bound"]
+        )
+        for p in ml_forecast["predicted_prices"]
+    ]
 
     return CropPricePredictionResponse(
         crop=crop,
         current_price=current_price,
-        trend_direction=trend,
+        trend_direction=ml_forecast["trend_direction"],
         historical_prices=historical,
         predicted_prices=predicted,
     )

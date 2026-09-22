@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box, Card, CardContent, Typography, Grid, MenuItem, TextField,
   Button, CircularProgress, Table, TableBody, TableCell, TableContainer,
@@ -12,43 +12,74 @@ import { profitService } from '../services/api';
 
 const CROPS = ['Rice', 'Wheat', 'Maize', 'Cotton', 'Sugarcane', 'Tomato', 'Onion', 'Potato'];
 
-const MOCK_COMPARISON = [
-  { crop: 'Rice', revenue: 94500, cost: 45000, profit: 49500 },
-  { crop: 'Wheat', revenue: 79200, cost: 38000, profit: 41200 },
-  { crop: 'Maize', revenue: 58500, cost: 28000, profit: 30500 },
-  { crop: 'Cotton', revenue: 162500, cost: 85000, profit: 77500 },
-  { crop: 'Sugarcane', revenue: 87500, cost: 52000, profit: 35500 },
-];
-
-const COST_BREAKDOWN = [
-  { name: 'Seeds', value: 12, color: '#10B981' },
-  { name: 'Fertilizer', value: 28, color: '#3B82F6' },
-  { name: 'Labour', value: 35, color: '#F59E0B' },
-  { name: 'Irrigation', value: 15, color: '#8B5CF6' },
-  { name: 'Misc', value: 10, color: '#EF4444' },
-];
-
 export default function ProfitAnalysis() {
   const [crop, setCrop] = useState('Rice');
   const [area, setArea] = useState(5);
   const [result, setResult] = useState(null);
+  const [comparisons, setComparisons] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const calculate = () => {
     setLoading(true);
     profitService.calculate({ crop, area_ha: area })
-      .then((res) => setResult(res.data))
-      .catch(() => {
-        const baseYield = { Rice: 4500, Wheat: 4200, Maize: 3900, Cotton: 2500, Sugarcane: 70000, Tomato: 18000, Onion: 15000, Potato: 20000 }[crop] || 4000;
-        const basePrice = { Rice: 2100, Wheat: 2200, Maize: 1800, Cotton: 6500, Sugarcane: 350, Tomato: 2500, Onion: 1800, Potato: 1500 }[crop] || 2000;
-        const baseCost = { Rice: 45000, Wheat: 38000, Maize: 28000, Cotton: 85000, Sugarcane: 52000, Tomato: 65000, Onion: 48000, Potato: 42000 }[crop] || 40000;
-        const totalYield = baseYield * area;
-        const totalRevenue = Math.round(totalYield * (basePrice / 100));
-        const totalCost = Math.round(baseCost * area);
-        setResult({ crop, area_ha: area, yield_kg: totalYield, price_per_kg: basePrice / 100, revenue: totalRevenue, cost: totalCost, profit: totalRevenue - totalCost, roi: Math.round(((totalRevenue - totalCost) / totalCost) * 100) });
+      .then((res) => {
+        const d = res.data;
+        setResult({
+          crop: d.crop,
+          area_ha: d.area_ha,
+          yield_kg: Math.round(d.expected_yield_kg_ha * d.area_ha),
+          revenue: d.total_revenue,
+          cost: d.estimated_cost,
+          profit: d.net_profit,
+          roi: d.roi_percent,
+          cost_breakdown: d.cost_breakdown,
+        });
+      })
+      .catch((err) => {
+        console.error('Profit calculation error:', err);
       })
       .finally(() => setLoading(false));
   };
+
+  useEffect(() => {
+    calculate();
+    profitService.getComparison()
+      .then((res) => {
+        const list = (res.data || []).map((c) => ({
+          crop: c.crop,
+          revenue: Math.round(c.revenue_per_ha * area),
+          cost: Math.round(c.cost_per_ha * area),
+          profit: Math.round(c.profit_per_ha * area),
+          revenue_per_ha: c.revenue_per_ha,
+          cost_per_ha: c.cost_per_ha,
+          profit_per_ha: c.profit_per_ha,
+          roi: Math.round(c.roi_percent),
+        }));
+        setComparisons(list);
+      })
+      .catch((err) => console.error('Failed to load profit comparison:', err));
+  }, [area]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const costBreakdownData = useMemo(() => {
+    if (!result?.cost_breakdown) {
+      return [
+        { name: 'Seeds', value: 15, color: '#10B981' },
+        { name: 'Fertilizer', value: 30, color: '#3B82F6' },
+        { name: 'Labour', value: 35, color: '#F59E0B' },
+        { name: 'Irrigation', value: 12, color: '#8B5CF6' },
+        { name: 'Other', value: 8, color: '#EF4444' },
+      ];
+    }
+    const cb = result.cost_breakdown;
+    const total = (cb.seeds || 0) + (cb.fertilizer || 0) + (cb.labor || 0) + (cb.irrigation || 0) + (cb.other || 0) || 1;
+    return [
+      { name: 'Seeds', value: Math.round(((cb.seeds || 0) / total) * 100), color: '#10B981' },
+      { name: 'Fertilizer', value: Math.round(((cb.fertilizer || 0) / total) * 100), color: '#3B82F6' },
+      { name: 'Labour', value: Math.round(((cb.labor || 0) / total) * 100), color: '#F59E0B' },
+      { name: 'Irrigation', value: Math.round(((cb.irrigation || 0) / total) * 100), color: '#8B5CF6' },
+      { name: 'Other', value: Math.round(((cb.other || 0) / total) * 100), color: '#EF4444' },
+    ];
+  }, [result]);
 
   return (
     <Box>
@@ -108,9 +139,9 @@ export default function ProfitAnalysis() {
         <Grid item xs={12} md={7}>
           <Card>
             <CardContent>
-              <Typography variant="h6" fontWeight={600} mb={2}>Crop Profitability Comparison (per 5 ha)</Typography>
+              <Typography variant="h6" fontWeight={600} mb={2}>Crop Profitability Comparison (for {area} ha)</Typography>
               <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={MOCK_COMPARISON}>
+                <BarChart data={comparisons}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
                   <XAxis dataKey="crop" tick={{ fontSize: 12 }} />
                   <YAxis tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} tick={{ fontSize: 12 }} />
@@ -129,17 +160,17 @@ export default function ProfitAnalysis() {
         <Grid item xs={12} md={5}>
           <Card>
             <CardContent>
-              <Typography variant="h6" fontWeight={600} mb={2}>Cost Breakdown</Typography>
+              <Typography variant="h6" fontWeight={600} mb={2}>Cost Breakdown ({crop})</Typography>
               <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
-                  <Pie data={COST_BREAKDOWN} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, value }) => `${name}: ${value}%`} labelLine={false}>
-                    {COST_BREAKDOWN.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
+                  <Pie data={costBreakdownData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, value }) => `${name}: ${value}%`} labelLine={false}>
+                    {costBreakdownData.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
                   </Pie>
                   <Tooltip formatter={(v) => [`${v}%`, '']} />
                 </PieChart>
               </ResponsiveContainer>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-                {COST_BREAKDOWN.map((item) => (
+                {costBreakdownData.map((item) => (
                   <Box key={item.name} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <Box sx={{ width: 10, height: 10, bgcolor: item.color, borderRadius: 1 }} />
                     <Typography variant="caption">{item.name}</Typography>
@@ -154,7 +185,7 @@ export default function ProfitAnalysis() {
         <Grid item xs={12}>
           <Card>
             <CardContent>
-              <Typography variant="h6" fontWeight={600} mb={2}>Per-Hectare Profitability</Typography>
+              <Typography variant="h6" fontWeight={600} mb={2}>Per-Hectare Profitability Analysis</Typography>
               <TableContainer>
                 <Table size="small">
                   <TableHead>
@@ -167,13 +198,13 @@ export default function ProfitAnalysis() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {MOCK_COMPARISON.map((row) => (
+                    {comparisons.map((row) => (
                       <TableRow key={row.crop} hover>
                         <TableCell fontWeight={600}>{row.crop}</TableCell>
-                        <TableCell align="right">₹{(row.revenue / 5).toLocaleString()}</TableCell>
-                        <TableCell align="right">₹{(row.cost / 5).toLocaleString()}</TableCell>
-                        <TableCell align="right" sx={{ color: 'success.main', fontWeight: 600 }}>₹{(row.profit / 5).toLocaleString()}</TableCell>
-                        <TableCell align="right" sx={{ color: 'primary.main', fontWeight: 600 }}>{Math.round((row.profit / row.cost) * 100)}%</TableCell>
+                        <TableCell align="right">₹{row.revenue_per_ha?.toLocaleString()}</TableCell>
+                        <TableCell align="right">₹{row.cost_per_ha?.toLocaleString()}</TableCell>
+                        <TableCell align="right" sx={{ color: row.profit_per_ha >= 0 ? 'success.main' : 'error.main', fontWeight: 600 }}>₹{row.profit_per_ha?.toLocaleString()}</TableCell>
+                        <TableCell align="right" sx={{ color: 'primary.main', fontWeight: 600 }}>{row.roi}%</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

@@ -102,16 +102,31 @@ export default function Feasibility() {
 
   const fetchFeasibility = () => {
     setLoading(true);
-    feasibilityService.getCrops({ location, soil_type: soilType, season, district })
-      .then((res) => setCrops(res.data?.crops || getCropsForState(location)))
-      .catch(() => setCrops(getCropsForState(location)))
+    feasibilityService.check({ location: location || 'Maharashtra', soil_type: soilType, season })
+      .then((res) => {
+        const cropsList = (res.data?.crops || []).map((c) => ({
+          crop: c.crop,
+          score: Math.round((c.feasibility_score || 0.8) * 100),
+          status: c.status,
+          water: c.factors?.[0] || 'Medium',
+          duration: '90-120 days',
+          reason: Array.isArray(c.factors) && c.factors.length > 0
+            ? c.factors.join(' • ')
+            : `${c.crop} is ${c.status.toLowerCase()} for ${soilType} soil during ${season} season.`,
+        }));
+        setCrops(cropsList);
+      })
+      .catch((err) => {
+        console.error('Feasibility calculation error:', err);
+        setCrops(getCropsForState(location));
+      })
       .finally(() => setLoading(false));
   };
 
   // Fetch when location is auto-filled from profile
   useEffect(() => {
     if (location) fetchFeasibility();
-  }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [location, soilType, season]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Box>

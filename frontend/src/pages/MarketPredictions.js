@@ -13,31 +13,14 @@ import { predictionService } from '../services/api';
 
 const CROPS = ['Rice', 'Wheat', 'Maize', 'Cotton', 'Sugarcane', 'Tomato', 'Onion', 'Potato'];
 
-const generatePriceData = (crop) => {
-  const base = { Rice: 2100, Wheat: 2200, Maize: 1800, Cotton: 6500, Sugarcane: 350, Tomato: 2500, Onion: 1800, Potato: 1500 }[crop] || 2000;
-  const months = ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'];
-  return months.map((month, i) => ({
-    month,
-    historical: i < 5 ? Math.round(base + (Math.random() - 0.5) * base * 0.15) : null,
-    predicted: i >= 4 ? Math.round(base * (1 + (i - 4) * 0.03 + (Math.random() - 0.5) * 0.05)) : null,
-  }));
-};
-
-const generateSeasonData = (crop) => {
-  const seasons = ['Kharif', 'Rabi', 'Zaid', 'Summer'];
-  return seasons.map((season) => ({
-    season,
-    demand: Math.round(40 + Math.random() * 60),
-    price_index: Math.round(60 + Math.random() * 40),
-  }));
-};
-
 export default function MarketPredictions() {
   const [selectedCrop, setSelectedCrop] = useState('Rice');
   const [priceData, setPriceData] = useState([]);
   const [seasonData, setSeasonData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [trend, setTrend] = useState({ direction: 'up', percent: 8.2 });
+  const [trend, setTrend] = useState({ direction: 'up', percent: '5.4' });
+  const [currentPrice, setCurrentPrice] = useState(2100);
+  const [predictedPrice, setPredictedPrice] = useState(2250);
 
   useEffect(() => {
     setLoading(true);
@@ -46,20 +29,54 @@ export default function MarketPredictions() {
       predictionService.getSeasonality(selectedCrop),
     ])
       .then(([pricesRes, seasonRes]) => {
-        setPriceData(pricesRes.data?.data || generatePriceData(selectedCrop));
-        setSeasonData(seasonRes.data?.data || generateSeasonData(selectedCrop));
-        setTrend(pricesRes.data?.trend || { direction: Math.random() > 0.4 ? 'up' : 'down', percent: (Math.random() * 15 + 2).toFixed(1) });
+        const hist = pricesRes.data?.historical_prices || [];
+        const pred = pricesRes.data?.predicted_prices || [];
+
+        const combined = [];
+        hist.slice(-5).forEach((p) => {
+          const d = new Date(p.date);
+          const m = d.toLocaleString('en-US', { month: 'short' });
+          combined.push({
+            month: m,
+            historical: Math.round(p.price * 100),
+            predicted: null,
+          });
+        });
+
+        pred.slice(0, 5).forEach((p) => {
+          const d = new Date(p.date);
+          const m = d.toLocaleString('en-US', { month: 'short' });
+          combined.push({
+            month: m,
+            historical: null,
+            predicted: Math.round(p.price * 100),
+          });
+        });
+
+        setPriceData(combined);
+
+        const cur = Math.round((pricesRes.data?.current_price || 21) * 100);
+        setCurrentPrice(cur);
+
+        const nextPred = pred[0] ? Math.round(pred[0].price * 100) : cur;
+        setPredictedPrice(nextPred);
+
+        const pct = cur > 0 ? (((nextPred - cur) / cur) * 100).toFixed(1) : '0.0';
+        const dir = (pricesRes.data?.trend_direction || 'UP').toUpperCase() === 'DOWN' ? 'down' : 'up';
+        setTrend({ direction: dir, percent: Math.abs(pct) });
+
+        const patterns = (seasonRes.data?.patterns || []).map((pat) => ({
+          season: pat.month,
+          demand: Math.round(pat.index * 60),
+          price_index: Math.round(pat.index * 100),
+        }));
+        setSeasonData(patterns);
       })
-      .catch(() => {
-        setPriceData(generatePriceData(selectedCrop));
-        setSeasonData(generateSeasonData(selectedCrop));
-        setTrend({ direction: Math.random() > 0.4 ? 'up' : 'down', percent: (Math.random() * 15 + 2).toFixed(1) });
+      .catch((err) => {
+        console.error('Failed to load market predictions from backend:', err);
       })
       .finally(() => setLoading(false));
   }, [selectedCrop]);
-
-  const currentPrice = priceData.find((d) => d.historical)?.historical || 2100;
-  const predictedPrice = priceData.find((d) => d.predicted)?.predicted || 2250;
 
   return (
     <Box>

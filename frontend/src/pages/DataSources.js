@@ -209,11 +209,25 @@ export default function DataSources() {
     const stateRaw = STATE_MANDI_DATA[userState?.trim()] || DEFAULT_MANDI_PRICES;
     const stateMock = buildMandiRows(stateRaw);
 
-    dataService.getMandiPrices({ state: userState })
+    dataService.getMandiPrices({ days: 3 })
       .then((res) => {
-        const prices = res.data?.prices;
-        if (prices && prices.length > 0) {
-          setMandiData(prices);
+        const raw = Array.isArray(res.data) ? res.data : (res.data?.prices || []);
+        if (raw && raw.length > 0) {
+          const mapped = raw.slice(0, 10).map((p) => {
+            const diff = p.price_per_quintal - p.min_price;
+            const pct = p.min_price > 0 ? ((diff / p.min_price) * 100).toFixed(1) : '0.0';
+            return {
+              mandi: p.market,
+              crop: p.crop,
+              price: Math.round(p.price_per_quintal),
+              prevPrice: Math.round(p.min_price),
+              change: parseFloat(pct),
+              unit: '₹/qtl',
+              quality: 'Grade A (MSP standard)',
+              date: p.date,
+            };
+          });
+          setMandiData(mapped);
         } else {
           setMandiData(stateMock);
         }

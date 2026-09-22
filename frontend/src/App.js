@@ -22,41 +22,81 @@ import CropRotation from './pages/CropRotation';
 import IoTMonitoring from './pages/IoTMonitoring';
 import CropPrediction from './pages/CropPrediction';
 import ClimateCropPredictor from './pages/ClimateCropPredictor';
+import DiseaseDetection from './pages/DiseaseDetection';
 import ChatWindow from './components/ChatBot/ChatWindow';
+
 
 const theme = createTheme({
   palette: {
-    primary: { main: '#10B981', dark: '#047857', light: '#6EE7B7' },
-    secondary: { main: '#92400e' },
-    warning: { main: '#F59E0B' },
-    error: { main: '#EF4444' },
-    info: { main: '#3B82F6' },
-    background: { default: 'transparent' },
+    primary: { main: '#059669', dark: '#047857', light: '#10B981', contrastText: '#ffffff' },
+    secondary: { main: '#D97706', dark: '#B45309', light: '#F59E0B' },
+    warning: { main: '#F59E0B', dark: '#D97706', light: '#FCD34D' },
+    error: { main: '#EF4444', dark: '#DC2626', light: '#F87171' },
+    info: { main: '#0284C7', dark: '#0369A1', light: '#38BDF8' },
+    success: { main: '#10B981', dark: '#059669', light: '#34D399' },
+    text: { primary: '#0F172A', secondary: '#64748B' },
+    background: { default: '#F8FAFC', paper: '#FFFFFF' },
+    divider: '#E2E8F0',
   },
   typography: {
-    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: '"Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    h1: { fontWeight: 800, letterSpacing: '-0.03em' },
+    h2: { fontWeight: 800, letterSpacing: '-0.025em' },
+    h3: { fontWeight: 700, letterSpacing: '-0.02em' },
+    h4: { fontWeight: 700, letterSpacing: '-0.02em' },
+    h5: { fontWeight: 700, letterSpacing: '-0.015em' },
+    h6: { fontWeight: 600, letterSpacing: '-0.01em' },
+    subtitle1: { fontWeight: 600 },
+    subtitle2: { fontWeight: 600 },
+    body1: { fontSize: '0.9375rem', lineHeight: 1.6 },
+    body2: { fontSize: '0.875rem', lineHeight: 1.55 },
+    button: { textTransform: 'none', fontWeight: 600 },
+  },
+  shape: {
+    borderRadius: 12,
   },
   components: {
     MuiButton: {
       styleOverrides: {
-        root: { textTransform: 'none', borderRadius: 8 },
+        root: {
+          textTransform: 'none',
+          borderRadius: 10,
+          fontWeight: 600,
+          boxShadow: 'none',
+          transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+          '&:hover': {
+            boxShadow: '0 4px 12px rgba(5, 150, 105, 0.2)',
+            transform: 'translateY(-1px)',
+          },
+        },
+        containedPrimary: {
+          background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+          '&:hover': {
+            background: 'linear-gradient(135deg, #047857 0%, #065F46 100%)',
+          },
+        },
       },
     },
     MuiCard: {
       styleOverrides: {
         root: {
           borderRadius: 16,
-          background: 'rgba(255, 255, 255, 0.93)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          border: '1px solid rgba(255, 255, 255, 0.5)',
-          boxShadow: '0 8px 32px rgba(6, 78, 59, 0.12)',
-          transition: 'all 0.3s ease',
+          background: '#FFFFFF',
+          border: '1px solid #E2E8F0',
+          boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
+          transition: 'transform 0.2s ease, box-shadow 0.2s ease',
           '&:hover': {
-            background: 'rgba(255, 255, 255, 0.98)',
-            boxShadow: '0 16px 48px rgba(6, 78, 59, 0.18)',
-            transform: 'translateY(-4px)',
+            boxShadow: '0 12px 28px -4px rgba(15, 23, 42, 0.08)',
+            transform: 'translateY(-2px)',
           },
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          fontWeight: 600,
+          borderRadius: 8,
         },
       },
     },
@@ -149,9 +189,18 @@ function AppRoutes() {
         element={<ProtectedRoute><AppLayout><ClimateCropPredictor /></AppLayout></ProtectedRoute>}
       />
       <Route
+        path="/disease-detection"
+        element={<ProtectedRoute><AppLayout><DiseaseDetection /></AppLayout></ProtectedRoute>}
+      />
+      <Route
+        path="/crop-doctor"
+        element={<ProtectedRoute><AppLayout><DiseaseDetection /></AppLayout></ProtectedRoute>}
+      />
+      <Route
         path="/rotation"
         element={<ProtectedRoute><AppLayout><CropRotation /></AppLayout></ProtectedRoute>}
       />
+
       <Route
         path="/iot"
         element={<ProtectedRoute><AppLayout><IoTMonitoring /></AppLayout></ProtectedRoute>}
