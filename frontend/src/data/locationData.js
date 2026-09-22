@@ -242,7 +242,7 @@ export const LOCATION_HIERARCHY = {
   // ─── Maharashtra ─────────────────────────────────────────────────────────
   'Maharashtra': {
     'Mumbai City': ['Fort', 'Andheri', 'Borivali', 'Chembur', 'Kurla'],
-    'Pune': ['Pune', 'Baramati', 'Haveli', 'Indapur', 'Khed'],
+    'Pune': ['Pune City', 'Pune', 'Baramati', 'Haveli', 'Indapur', 'Khed', 'Shirur', 'Maval', 'Ambegaon'],
     'Nagpur': ['Nagpur', 'Hingna', 'Kamptee', 'Kalmeshwar', 'Narkhed'],
     'Nashik': ['Nashik', 'Dindori', 'Igatpuri', 'Niphad', 'Sinnar'],
     'Chhatrapati Sambhajinagar': ['Chhatrapati Sambhajinagar', 'Gangapur', 'Kannad', 'Paithan', 'Phulambri'],

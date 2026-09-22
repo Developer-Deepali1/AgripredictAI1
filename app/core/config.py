@@ -1,6 +1,10 @@
-"""
-Application configuration settings
-"""
+from pathlib import Path
+from dotenv import load_dotenv
+env_path = Path(__file__).resolve().parent.parent.parent / ".env"
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path, override=True)
+load_dotenv(override=True)
+
 from pydantic import Field
 from pydantic_settings import BaseSettings
 from typing import List
@@ -64,6 +68,8 @@ class Settings(BaseSettings):
 
     # Chatbot / Voice / Translation Settings
     OPENAI_API_KEY: str = ""
+    GEMINI_API_KEY: str = ""
+    GEMINI_MODEL: str = "gemini-3.6-flash"
     GOOGLE_TRANSLATE_API_KEY: str = ""
     ENABLE_VOICE: bool = True
     ENABLE_MULTILINGUAL: bool = True

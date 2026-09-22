@@ -31,6 +31,7 @@ class DiseasePredictionResponse(BaseModel):
     severity_grade: str = Field(default="MILD", description="Disease severity: MILD, MODERATE, or SEVERE")
     urgency: str = Field(default="LOW", description="Urgency of treatment: HIGH, MEDIUM, or LOW")
     weather_risk_note: Optional[str] = Field(None, description="Agronomic correlation with ambient temperature/humidity")
+    ai_engine: Optional[str] = Field(default="Computer Vision + GradCAM", description="Diagnostic model or ensemble engine")
 
 
 class DiseaseFeedbackRequest(BaseModel):

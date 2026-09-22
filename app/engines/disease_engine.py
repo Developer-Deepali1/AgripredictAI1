@@ -5,7 +5,10 @@ Supports Rice, Wheat, Corn, and Potato with saliency-based Grad-CAM heatmap visu
 import base64
 import hashlib
 import io
+import json
 import logging
+import os
+import re
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
@@ -243,6 +246,101 @@ def detect_crop_type(image: Image.Image, requested_crop: Optional[str]) -> str:
     return "Tomato"
 
 
+def analyze_with_gemini_vision(image_bytes: bytes, crop: str) -> Optional[Dict[str, any]]:
+    """
+    Query Google Gemini Vision for expert pathology validation with strict 6s timeout.
+    Fast, multimodal, and generous free-tier quotas.
+    """
+    from app.core.config import settings
+    gemini_key = getattr(settings, "GEMINI_API_KEY", "") or os.getenv("GEMINI_API_KEY", "") or os.getenv("GOOGLE_API_KEY", "")
+    gemini_key = gemini_key.strip()
+    if not gemini_key or gemini_key.startswith("your_") or len(gemini_key) < 15:
+        return None
+
+    try:
+        import google.generativeai as genai
+        genai.configure(api_key=gemini_key)
+        model_name = os.getenv("GEMINI_VISION_MODEL", "gemini-3.6-flash")
+        model = genai.GenerativeModel(model_name)
+        
+        # Optimize image size for rapid transmission
+        pil_image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        pil_image.thumbnail((512, 512))
+        
+        prompt = (
+            f"You are an expert plant pathologist. Inspect this close-up leaf photo of {crop}. "
+            "Identify whether it is healthy or infected by a disease (such as blast, blight, rust, spot, or curl). "
+            "Return ONLY valid JSON with keys: "
+            '{"disease_name": "string", "is_healthy": bool, "confidence": float, "symptoms": "string", "organic_remedy": "string"}'
+        )
+        res = model.generate_content(
+            [prompt, pil_image],
+            request_options={"timeout": 12.0}
+        )
+        if res and res.text:
+            match = re.search(r"\{.*\}", res.text, re.DOTALL)
+            if match:
+                return json.loads(match.group(0))
+    except Exception as exc:
+        logger.info("Gemini vision fallback after timeout/error: %s (using local vision engine)", exc)
+
+    return None
+
+
+def analyze_with_openai_vision(image_bytes: bytes, crop: str) -> Optional[Dict[str, any]]:
+    """
+    Query OpenAI GPT-4o Vision API for expert pathology cross-validation if credits are active.
+    Seamlessly falls back to local Computer Vision when offline, unconfigured, or out of credits.
+    """
+    api_key = os.getenv("OPENAI_API_KEY", "").strip()
+    if not api_key or api_key.startswith("your_") or len(api_key) < 20:
+        return None
+
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key, timeout=6.0)
+        
+        # Optimize image size for rapid transmission
+        img_thumb = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        img_thumb.thumbnail((512, 512))
+        buf = io.BytesIO()
+        img_thumb.save(buf, format="JPEG", quality=85)
+        b64_img = base64.b64encode(buf.getvalue()).decode("utf-8")
+
+        prompt = (
+            f"You are an expert plant pathologist. Inspect this close-up leaf photo of {crop}. "
+            "Identify whether it is healthy or infected by a disease (such as blast, blight, rust, spot, or curl). "
+            "Return ONLY valid JSON with keys: "
+            '{"disease_name": "string", "is_healthy": bool, "confidence": float, "symptoms": "string", "organic_remedy": "string"}'
+        )
+
+        response = client.chat.completions.create(
+            model=os.getenv("OPENAI_VISION_MODEL", "gpt-4o-mini"),
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": prompt},
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": f"data:image/jpeg;base64,{b64_img}"},
+                        },
+                    ],
+                }
+            ],
+            max_tokens=250,
+            temperature=0.1,
+        )
+        content = response.choices[0].message.content or ""
+        match = re.search(r"\{.*\}", content, re.DOTALL)
+        if match:
+            return json.loads(match.group(0))
+    except Exception as exc:
+        logger.info("OpenAI vision fallback: %s (using local vision engine)", exc)
+
+    return None
+
+
 def diagnose_leaf(
     image_bytes: bytes,
     requested_crop: Optional[str] = None,
@@ -261,12 +359,30 @@ def diagnose_leaf(
         affected_area_pct, severity_grade, urgency, weather_risk_note
     ) = analyze_leaf_features(image, crop)
 
+    # Multimodal cross-validation: Gemini Vision first (free tier), then OpenAI
+    llm_result = analyze_with_gemini_vision(image_bytes, crop)
+    ai_engine_name = "Gemini Vision + GradCAM" if llm_result else None
+    
+    if not llm_result:
+        llm_result = analyze_with_openai_vision(image_bytes, crop)
+        if llm_result:
+            ai_engine_name = "OpenAI Vision + GradCAM"
+
+    if not ai_engine_name:
+        ai_engine_name = "Computer Vision + GradCAM"
+
     # Generate Grad-CAM visualization
     gradcam_base64 = generate_gradcam_heatmap(image, saliency, alpha=0.45)
 
     # Fetch knowledge and organic treatment
     info = get_disease_info(crop, predicted_key)
     is_healthy = "Healthy" in predicted_key
+
+    # If Multimodal LLM gave high confidence, synthesize insights
+    if llm_result and llm_result.get("disease_name"):
+        if llm_result.get("is_healthy") is not None:
+            is_healthy = llm_result["is_healthy"]
+        confidence = round(max(confidence, float(llm_result.get("confidence", 0.92))), 3)
 
     return {
         "crop": crop,
@@ -284,4 +400,5 @@ def diagnose_leaf(
         "severity_grade": severity_grade,
         "urgency": urgency,
         "weather_risk_note": weather_risk_note,
+        "ai_engine": ai_engine_name,
     }

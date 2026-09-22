@@ -23,6 +23,7 @@
       "recommendations": "स्मार्ट सुझाव",
       "cropPrediction": "फसल पूर्वानुमान",
       "climatePredictor": "जलवायु पूर्वानुमान",
+      "diseaseDetection": "क्रॉप डॉक्टर (रोग पहचान)",
       "rotation": "फसल चक्र",
       "iot": "IoT निगरानी",
       "simulator": "सिम्युलेटर",

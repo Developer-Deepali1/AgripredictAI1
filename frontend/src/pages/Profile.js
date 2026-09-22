@@ -189,6 +189,9 @@ export default function Profile() {
                 SelectProps={{ MenuProps: { PaperProps: { sx: { maxHeight: 300 } } } }}
               >
                 {districts.map((d) => <MenuItem key={d} value={d}>{d}</MenuItem>)}
+                {formik.values.district && !districts.includes(formik.values.district) && (
+                  <MenuItem key={formik.values.district} value={formik.values.district}>{formik.values.district}</MenuItem>
+                )}
               </TextField>
             </Grid>
             <Grid item xs={12} sm={4}>
@@ -201,6 +204,9 @@ export default function Profile() {
                 SelectProps={{ MenuProps: { PaperProps: { sx: { maxHeight: 300 } } } }}
               >
                 {localAreas.map((a) => <MenuItem key={a} value={a}>{a}</MenuItem>)}
+                {formik.values.local_area && !localAreas.includes(formik.values.local_area) && (
+                  <MenuItem key={formik.values.local_area} value={formik.values.local_area}>{formik.values.local_area}</MenuItem>
+                )}
               </TextField>
             </Grid>
           </Grid>

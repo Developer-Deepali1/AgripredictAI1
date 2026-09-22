@@ -23,6 +23,7 @@
       "recommendations": "Smart Recommendations",
       "cropPrediction": "Crop Prediction",
       "climatePredictor": "Climate Predictor",
+      "diseaseDetection": "Crop Doctor",
       "rotation": "Crop Rotation",
       "iot": "IoT Monitoring",
       "simulator": "Simulator",
